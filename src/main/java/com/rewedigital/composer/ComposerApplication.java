@@ -20,33 +20,47 @@ import com.typesafe.config.Config;
 
 public class ComposerApplication {
 
+    static final String COMPOSER = "composer";
+
     public static void main(final String[] args) throws LoadingException {
-
-        final Service service =
-            HttpService
-                .usingAppInit(Initializer::init, "composer")
-                .withModule(HttpClientModule.create())
-                .withModule(ClientDecoratingModule.create(new ErrorClientDecorator()))
-                .build();
-
-        HttpService.boot(service, args);
+        HttpService.boot(bootstrapService(), args);
     }
 
-    private static class Initializer {
+    private static Service bootstrapService() {
+        return HttpService
+            .usingAppInit(Initializer::init, COMPOSER)
+            .withEnvVarPrefix(COMPOSER.toUpperCase())
+            .withModule(HttpClientModule.create())
+            .withModule(ClientDecoratingModule.create(new ErrorClientDecorator()))
+            .build();
+    }
 
-        private static void init(final Environment environment) {
+    static class Initializer {
+
+        static void init(final Environment environment) {
             final Config configuration = withDefaults(environment.config());
 
             final ComposingRequestHandler handler =
                 new ComposingRequestHandler(
-                    new BackendRouting(configuration.getConfig("composer.routing")),
+                    new BackendRouting(configuration.getConfig(COMPOSER + ".routing")),
                     new RouteTypes(
-                        new ComposerFactory(configuration.getConfig("composer.html")),
+                        new ComposerFactory(configuration.getConfig(COMPOSER + ".html")),
                         new SessionAwareProxyClient()),
-                    new CookieBasedSessionHandler.Factory(configuration.getConfig("composer.session")));
+                    new CookieBasedSessionHandler.Factory(configuration.getConfig(COMPOSER + ".session")));
 
+            configureRoutes(environment, handler);
+        }
+
+        private static void configureRoutes(final Environment environment, final ComposingRequestHandler handler) {
             environment.routingEngine()
                 .registerAutoRoute(Route.async("GET", "/", rc -> handler.execute(rc)))
+                .registerAutoRoute(Route.async("HEAD", "/", rc -> handler.execute(rc)))
+                .registerAutoRoute(Route.async("POST", "/", rc -> handler.execute(rc)))
+                .registerAutoRoute(Route.async("PUT", "/", rc -> handler.execute(rc)))
+                .registerAutoRoute(Route.async("DELETE", "/", rc -> handler.execute(rc)))
+                .registerAutoRoute(Route.async("TRACE", "/", rc -> handler.execute(rc)))
+                .registerAutoRoute(Route.async("OPTIONS", "/", rc -> handler.execute(rc)))
+                .registerAutoRoute(Route.async("PATCH", "/", rc -> handler.execute(rc)))
                 .registerAutoRoute(Route.async("GET", "/<path:path>", rc -> handler.execute(rc)))
                 .registerAutoRoute(Route.async("HEAD", "/<path:path>", rc -> handler.execute(rc)))
                 .registerAutoRoute(Route.async("POST", "/<path:path>", rc -> handler.execute(rc)))
@@ -58,4 +72,5 @@ public class ComposerApplication {
         }
 
     }
+
 }

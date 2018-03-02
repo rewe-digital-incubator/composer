@@ -25,10 +25,6 @@ class ContentMarkupHandler extends AbstractMarkupHandler {
     private boolean parsingLink = false;
 
 
-    public List<String> assetLinks() {
-        return links;
-    }
-
     public ContentMarkupHandler(final ContentRange defaultContentRange, final ComposerHtmlConfiguration configuration) {
         this.defaultContentRange = defaultContentRange;
         this.contentTag = configuration.contentTag().toCharArray();
@@ -39,6 +35,10 @@ class ContentMarkupHandler extends AbstractMarkupHandler {
         return contentEnd <= 0 ? defaultContentRange : new ContentRange(contentStart, contentEnd);
     }
 
+    public List<String> assetLinks() {
+        return links;
+    }
+    
     @Override
     public void handleStandaloneElementStart(final char[] buffer, final int nameOffset, final int nameLen,
         final boolean minimized, final int line, final int col) throws ParseException {

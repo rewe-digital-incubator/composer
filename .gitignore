@@ -88,3 +88,6 @@ local.properties
 ### IDEA ###
 .idea
 *.iml
+
+### VSCode ###
+.vscode/

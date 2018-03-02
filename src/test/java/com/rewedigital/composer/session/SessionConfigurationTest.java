@@ -59,8 +59,7 @@ public class SessionConfigurationTest {
         final Map<String, Object> args = new HashMap<>();
         args.put("ttl", 0);
         args.put("renew-after", 0);
-        return interceptorConfig("com.rewedigital.composer.session.LocalSessionIdInterceptor",
-            args);
+        return interceptorConfig("com.rewedigital.composer.session.LocalSessionIdInterceptor", args);
     }
 
     private static Map<String, Object> interceptorConfig(final String type, final Map<String, Object> args) {
