@@ -26,17 +26,21 @@ public class CompositionTest {
 
     @Rule
     public ServiceHelper serviceHelper =
-        ServiceHelper.create(ComposerApplication.Initializer::init, ComposerApplication.COMPOSER)
+        ServiceHelper.create(ComposerApplication.Initializer::init, "composer")
             .conf("composer.routing.local-routes", routesConfig(mockServerUrl()))
             .conf("composer.html.include-tag", "include")
             .conf("composer.html.content-tag", "content");
 
     @Test
-    public void parsesMasterTemplateAndCombinesChildTemplate() throws Exception {
+    public void parsesMasterTemplateAndCombinesWithChildTemplate() throws Exception {
         mockMicroServices();
 
         final CompletionStage<Response<ByteString>> composedFuture = serviceHelper.request("GET", "/compose");
-        assertThat(responseBody(composedFuture)).isEqualTo("4223");
+        assertThat(responseBody(composedFuture)).isEqualTo(expectedComposedResponse());
+    }
+    
+    private String expectedComposedResponse() {
+        return "template+content";
     }
 
     private String responseBody(final CompletionStage<Response<ByteString>> composedFuture)
@@ -46,11 +50,11 @@ public class CompositionTest {
 
     private void mockMicroServices() {
         server.enqueue(
-            new MockResponse().setBody("42<include path=\"" + mockServerUrl() + "\">Fallback</include>")
+            new MockResponse().setBody("template+<include path=\"" + mockServerUrl() + "\"></include>")
         );
         
         server.enqueue(
-            new MockResponse().setBody("<content>23</content>").setHeader("Content-Type", "text/html")
+            new MockResponse().setBody("<content>content</content>").setHeader("Content-Type", "text/html")
         );
     }
 

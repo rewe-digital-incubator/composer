@@ -10,14 +10,14 @@ import com.typesafe.config.ConfigValue;
 
 public class DefaultConfiguration {
 
-    private static final Map<String, Object> DEFAULT_CONFIGURATION = initDefaultConfigurationMap();
+    private static final Map<String, Object> defaultConfiguration = initDefaultConfigurationMap();
 
     public static Config withDefaults(final Config config) {
         return config.withFallback(defaultConfiguration());
     }
 
     public static Config defaultConfiguration() {
-        return ConfigFactory.parseMap(DEFAULT_CONFIGURATION, "default-configuration");
+        return ConfigFactory.parseMap(defaultConfiguration, "default-configuration");
     }
 
     private static Map<String, Object> initDefaultConfigurationMap() {
