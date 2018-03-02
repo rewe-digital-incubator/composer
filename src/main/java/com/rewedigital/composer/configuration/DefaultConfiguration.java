@@ -25,13 +25,14 @@ public class DefaultConfiguration {
         result.put("composer.html.include-tag", "rewe-digital-include");
         result.put("composer.html.content-tag", "rewe-digital-content");
         result.put("composer.html.asset-options-attribute", "data-rd-options");
+        result.put("composer.html.max-recursion", 5);
 
         result.put("composer.session.enabled", Boolean.TRUE);
         result.put("composer.session.cookie", "rdsession");
         result.put("composer.session.signing-algorithm", "HS512");
         result.put("composer.session.signing-key", "123");
         result.put("composer.session.interceptors", Collections.<ConfigValue>emptyList());
-        
+
         result.put("composer.routing.local-routes", Collections.<ConfigValue>emptyList());
         return result;
     }

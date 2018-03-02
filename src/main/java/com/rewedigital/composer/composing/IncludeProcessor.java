@@ -23,17 +23,17 @@ class IncludeProcessor {
     }
 
     public CompletableFuture<Composition> composeIncludes(final ContentFetcher contentFetcher,
-        final ContentComposer composer) {
+        final ContentComposer composer, final CompositionStep step) {
         final Stream<CompletableFuture<Composition>> composedIncludes = includedServices.stream()
             .filter(s -> s.isInRage(contentRange))
-            .map(s -> s.fetch(contentFetcher)
+            .map(s -> s.fetch(contentFetcher, step)
                 .thenCompose(r -> r.compose(composer)));
         return flatten(composedIncludes)
-            .thenApply(c -> Composition.forRoot(template, contentRange, assetLinks, c.collect(toList())));
+            .thenApply(c -> Composition.of(template, contentRange, assetLinks, c.collect(toList())));
     }
 
     private static <T> CompletableFuture<Stream<T>> flatten(final Stream<CompletableFuture<T>> com) {
-        final List<CompletableFuture<T>> list = com.map(c -> c.toCompletableFuture()).collect(Collectors.toList());
+        final List<CompletableFuture<T>> list = com.collect(Collectors.toList());
         return CompletableFuture.allOf(list.toArray(new CompletableFuture[list.size()]))
             .thenApply(v -> list.stream().map(CompletableFuture::join));
     }

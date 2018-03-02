@@ -20,14 +20,16 @@ public class AttoParserBasedComposer implements ContentComposer, TemplateCompose
     public AttoParserBasedComposer(final ContentFetcher contentFetcher, final SessionRoot session,
         final ComposerHtmlConfiguration configuration) {
         this.configuration = requireNonNull(configuration);
-        this.contentFetcher = requireNonNull(contentFetcher);
+        this.contentFetcher =
+            new RecursionAwareContentFetcher(requireNonNull(contentFetcher), configuration.maxRecursion());
         this.session = requireNonNull(session);
     }
 
     @Override
-    public CompletableFuture<ResponseWithSession<String>> composeTemplate(final Response<String> templateResponse) {
+    public CompletableFuture<ResponseWithSession<String>> composeTemplate(final Response<String> templateResponse,
+        final String templatePath) {
         return parse(bodyOf(templateResponse), ContentRange.allUpToo(bodyOf(templateResponse).length()))
-            .composeIncludes(contentFetcher, this)
+            .composeIncludes(contentFetcher, this, CompositionStep.root(templatePath))
             .thenApply(c -> c.withSession(SessionFragment.of(templateResponse)))
             .thenApply(c -> c.map(toResponse()));
     }
@@ -38,9 +40,10 @@ public class AttoParserBasedComposer implements ContentComposer, TemplateCompose
     }
 
     @Override
-    public CompletableFuture<Composition> composeContent(final Response<String> contentResponse) {
+    public CompletableFuture<Composition> composeContent(final Response<String> contentResponse,
+        final CompositionStep step) {
         return parse(bodyOf(contentResponse), ContentRange.empty())
-            .composeIncludes(contentFetcher, this)
+            .composeIncludes(contentFetcher, this, step)
             .thenApply(c -> c.withSession(SessionFragment.of(contentResponse)));
     }
 

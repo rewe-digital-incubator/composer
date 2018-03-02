@@ -17,7 +17,7 @@ class Composition {
     private final ContentRange contentRange;
     private final SessionFragment session;
 
-    public Composition(final String template, final ContentRange contentRange, final List<String> assetLinks,
+    private Composition(final String template, final ContentRange contentRange, final List<String> assetLinks,
         final List<Composition> children) {
         this(0, template.length(), template, contentRange, assetLinks, SessionFragment.empty(), children);
     }
@@ -44,12 +44,11 @@ class Composition {
             this.session.mergedWith(session), children);
     }
 
-    public static Composition forRoot(final String template, final ContentRange contentRange,
+    public static Composition of(final String template, final ContentRange contentRange,
         final List<String> assetLinks, final List<Composition> children) {
         return new Composition(template, contentRange, assetLinks, children);
     }
 
-    // TODO TV make the recursion more explicit
     private String body() {
         final StringWriter writer = new StringWriter(template.length());
         int currentIndex = contentRange.start();

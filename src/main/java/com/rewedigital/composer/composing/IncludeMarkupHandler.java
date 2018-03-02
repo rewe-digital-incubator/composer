@@ -17,7 +17,6 @@ class IncludeMarkupHandler extends AbstractMarkupHandler {
 
     private final List<IncludedService> includedServices = new ArrayList<>();
     private final ContentMarkupHandler contentMarkupHandler;
-
     private Optional<IncludedService> include = Optional.empty();
     private StringWriter fallbackWriter;
     private IMarkupHandler next;
@@ -26,15 +25,14 @@ class IncludeMarkupHandler extends AbstractMarkupHandler {
 
     public IncludeMarkupHandler(final ContentRange defaultContentRange, final ComposerHtmlConfiguration configuration) {
         this.includeTag = configuration.includeTag().toCharArray();
-        contentMarkupHandler = new ContentMarkupHandler(defaultContentRange, configuration);
-        next = contentMarkupHandler;
+        this.contentMarkupHandler = new ContentMarkupHandler(defaultContentRange, configuration);
+        this.next = contentMarkupHandler;
     }
 
     public IncludeProcessor buildProcessor(final String template) {
         return new IncludeProcessor(template, includedServices, contentRange(),
             assetLinks());
     }
-
 
     private ContentRange contentRange() {
         return contentMarkupHandler.contentRange();

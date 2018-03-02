@@ -32,9 +32,10 @@ public class ValidatingContentFetcher implements ContentFetcher {
     }
 
     @Override
-    public CompletableFuture<Response<String>> fetch(final String path, final String fallback) {
+    public CompletableFuture<Response<String>> fetch(final String path, final String fallback,
+        final CompositionStep step) {
         if (path == null || path.trim().isEmpty()) {
-            LOGGER.warn("Empty path attribute in include found");
+            LOGGER.warn("Empty path attribute in include found - callstack: " + step.callStack());
             return CompletableFuture.completedFuture(Response.forPayload(""));
         }
 

@@ -9,17 +9,13 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.rewedigital.composer.composing.ComposerHtmlConfiguration;
-import com.rewedigital.composer.composing.ContentMarkupHandler;
-import com.rewedigital.composer.composing.ContentRange;
-
 public class ContentMarkupHandlerTest {
 
     private static final ContentRange defaultContentRange = new ContentRange(123, 456);
 
     @Test
     public void parsesStylesheetLinksFromHead() {
-        List<String> result = parse("<!DOCTYPE html><html>\n" +
+        final List<String> result = parse("<!DOCTYPE html><html>\n" +
             "<head>"
             + "<link href=\"../static/css/core.css\" data-rd-options=\"include-in-head\" rel=\"stylesheet\" media=\"screen\" />"
             + "<link href=\"../static/css/other.css\" data-rd-options=\"include-in-head\" rel=\"stylesheet\" media=\"screen\"></link>"
@@ -51,7 +47,7 @@ public class ContentMarkupHandlerTest {
     private ContentMarkupHandler parse(final String data) {
         final ContentMarkupHandler markupHandler =
             new ContentMarkupHandler(defaultContentRange,
-                new ComposerHtmlConfiguration("", "rewe-digital-content", "data-rd-options"));
+                new ComposerHtmlConfiguration("", "rewe-digital-content", "data-rd-options", 1));
         PARSER.parse(data, markupHandler);
         return markupHandler;
     }

@@ -66,11 +66,27 @@ For this to work, a couple of conventions must be followed. For example, css sho
 
 Include tags are resolved in parallel. Included content can again specify includes using the *include* tag. When building the response, these include tags are resolved recursively. Asset links are written "in order", the order is determined by the order in which include tags occur.
 
+The maximal depth for the recursion can be limited via the configuration property `composer.html.max-recursion`. If the limit is exceeded, the *fallback* for the include is used. 
+
+**Fallback content**
+
+If an include could not be resolved (for example, because the endpoint called for content returned an empty response), the markup enclosed by the *include* tag can specify a fallback. Here, the *content* tag can be used to mark the part that should be used as fallback content.
+
+*Example*
+```
+<rewe-digital-include path="returns/empty/response">
+    <div>not part of fallback</div>
+    <rewe-digital-content>
+        <div>the fallback</div>
+    </rewe-digital-content>
+</rewe-digital-include>
+``` 
+
 ### Session handling
 
 **Session data management**
 
-Composer contains an optional (toggled via configuration) session mechanism. A session is stored as encrypted cookie. Session values are forwared to called services (template and content) as http headers using the prefix `x-rd-`. So, a session value named `foo` with value `bar` would be forwarded as `x-rd-foo: bar`. 
+Composer contains an optional (toggled via configuration) session mechanism. A session is stored as encrypted cookie. Session values are forwarded to called services (template and content) as http headers using the prefix `x-rd-`. So, a session value named `foo` with value `bar` would be forwarded as `x-rd-foo: bar`. 
 
 Services can set session values by sending the appropriate response header. Thus, a service (template or content fragment) sending the response header `x-rd-foo: bar` would set a new or overwrite an existing session attribute named `foo` with the value `bar`. To remove a session attribute, an empty value can be provided.
 

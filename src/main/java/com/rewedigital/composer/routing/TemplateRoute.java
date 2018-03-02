@@ -33,11 +33,13 @@ public class TemplateRoute implements RouteType {
         final SessionRoot session) {
         return templateClient.fetch(rm.expandedPath(), context, session)
             .thenCompose(
-                templateResponse -> process(context.requestScopedClient(), rm.parsedPathArguments(), templateResponse));
+                templateResponse -> process(context.requestScopedClient(), rm.parsedPathArguments(), templateResponse,
+                    rm.expandedPath()));
     }
 
     private CompletionStage<ResponseWithSession<ByteString>> process(final Client client,
-        final Map<String, Object> pathArguments, final ResponseWithSession<ByteString> responseWithSession) {
+        final Map<String, Object> pathArguments, final ResponseWithSession<ByteString> responseWithSession,
+        final String path) {
         final Response<ByteString> response = responseWithSession.response();
 
         if (isError(response)) {
@@ -48,7 +50,7 @@ public class TemplateRoute implements RouteType {
 
         return composerFactory
             .build(client, pathArguments, responseWithSession.session())
-            .composeTemplate(response.withPayload(response.payload().get().utf8()))
+            .composeTemplate(response.withPayload(response.payload().get().utf8()), path)
             .thenApply(r -> r.transform(this::toByteString))
             .thenApply(r -> r.transform(p -> p.withHeaders(contentTypeOf(response))));
     }

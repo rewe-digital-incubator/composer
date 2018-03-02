@@ -8,6 +8,7 @@ import com.spotify.apollo.Response;
 
 public interface TemplateComposer {
 
-    CompletableFuture<ResponseWithSession<String>> composeTemplate(final Response<String> templateResponse);
+    public CompletableFuture<ResponseWithSession<String>> composeTemplate(final Response<String> templateResponse,
+        final String path);
 
 }
