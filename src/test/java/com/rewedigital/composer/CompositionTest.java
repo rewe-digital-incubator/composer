@@ -27,7 +27,9 @@ public class CompositionTest {
     @Rule
     public ServiceHelper serviceHelper =
         ServiceHelper.create(ComposerApplication.Initializer::init, ComposerApplication.COMPOSER)
-            .conf("composer.routing.local-routes", routesConfig(mockServerUrl()));
+            .conf("composer.routing.local-routes", routesConfig(mockServerUrl()))
+            .conf("composer.html.include-tag", "include")
+            .conf("composer.html.content-tag", "content");
 
     @Test
     public void parsesMasterTemplateAndCombinesChildTemplate() throws Exception {
@@ -43,10 +45,13 @@ public class CompositionTest {
     }
 
     private void mockMicroServices() {
-        server.enqueue(new MockResponse()
-            .setBody("42<rewe-digital-include path=\"" + mockServerUrl() + "\">Fallback</rewe-digital-include>"));
-        server.enqueue(new MockResponse().setBody("<rewe-digital-content>23</rewe-digital-content>")
-            .setHeader("Content-Type", "text/html"));
+        server.enqueue(
+            new MockResponse().setBody("42<include path=\"" + mockServerUrl() + "\">Fallback</include>")
+        );
+        
+        server.enqueue(
+            new MockResponse().setBody("<content>23</content>").setHeader("Content-Type", "text/html")
+        );
     }
 
     private String mockServerUrl() {
