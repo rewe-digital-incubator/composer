@@ -1,5 +1,6 @@
 package com.rewedigital.composer.composing;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
@@ -15,7 +16,7 @@ public class RecursionAwareContentFetcher implements ContentFetcher {
     private final int maxRecursion;
 
     public RecursionAwareContentFetcher(final ContentFetcher contentFetcher, final int maxRecursion) {
-        this.contentFetcher = contentFetcher;
+        this.contentFetcher = Objects.requireNonNull(contentFetcher);
         this.maxRecursion = maxRecursion;
     }
 
