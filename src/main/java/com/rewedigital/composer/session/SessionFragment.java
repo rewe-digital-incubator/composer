@@ -9,6 +9,10 @@ import java.util.Optional;
 
 import com.spotify.apollo.Response;
 
+/**
+ * Describes a fragment of a session that is constructed from http headers of a (template or content) response. Session
+ * fragments can be merged to construct a combined fragment.
+ */
 public class SessionFragment {
 
     private static final SessionFragment emptySession = new SessionFragment(new HashMap<>());

@@ -18,6 +18,9 @@ import com.spotify.apollo.Status;
 
 import okio.ByteString;
 
+/**
+ * {@link RouteType} <em>template</em> executes composition logic on the response of the route target.
+ */
 public class TemplateRoute implements RouteType {
 
     private final ComposerFactory composerFactory;

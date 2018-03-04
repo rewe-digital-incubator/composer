@@ -5,10 +5,14 @@ import java.util.concurrent.CompletableFuture;
 import com.rewedigital.composer.session.ResponseWithSession;
 import com.spotify.apollo.Response;
 
-
+/**
+ * <code>TemplateComposer</code> provides the interface to execute the main purpose of <em>Composer</em>: Composing a
+ * web page out of a template and content fragments.
+ *
+ */
 public interface TemplateComposer {
 
-    public CompletableFuture<ResponseWithSession<String>> composeTemplate(final Response<String> templateResponse,
-        final String path);
+    CompletableFuture<ResponseWithSession<String>> composeTemplate(Response<String> templateResponse,
+        String templatePath);
 
 }

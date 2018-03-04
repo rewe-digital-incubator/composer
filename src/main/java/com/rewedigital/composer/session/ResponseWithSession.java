@@ -5,6 +5,9 @@ import java.util.function.Function;
 
 import com.spotify.apollo.Response;
 
+/**
+ * Holds a response with payload of type <code>T</code> and a session.
+ */
 public class ResponseWithSession<T> {
 
     private final Response<T> response;
@@ -22,7 +25,7 @@ public class ResponseWithSession<T> {
     public SessionRoot session() {
         return session;
     }
-    
+
     public <S> ResponseWithSession<S> transform(final Function<Response<T>, Response<S>> transformation) {
         return new ResponseWithSession<S>(transformation.apply(response), session);
     }

@@ -6,6 +6,10 @@ import com.rewedigital.composer.session.SessionRoot;
 import com.spotify.apollo.Client;
 import com.typesafe.config.Config;
 
+/**
+ * Creates a new {@link TemplateComposer} instance.
+ *
+ */
 public class ComposerFactory {
 
     private final ComposerHtmlConfiguration configuration;

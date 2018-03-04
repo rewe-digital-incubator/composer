@@ -17,7 +17,7 @@ class IncludeMarkupHandler extends AbstractMarkupHandler {
 
     private final List<IncludedService> includedServices = new ArrayList<>();
     private final ContentMarkupHandler contentMarkupHandler;
-    private Optional<IncludedService> include = Optional.empty();
+    private Optional<IncludedService.Builder> include = Optional.empty();
     private StringWriter fallbackWriter;
     private IMarkupHandler next;
     private boolean collectAttributes = false;
@@ -48,7 +48,7 @@ class IncludeMarkupHandler extends AbstractMarkupHandler {
         throws ParseException {
         next.handleOpenElementStart(buffer, nameOffset, nameLen, line, col);
         if (isIncludeElement(buffer, nameOffset, nameLen)) {
-            final IncludedService value = new IncludedService();
+            final IncludedService.Builder value = new IncludedService.Builder();
             value.startOffset(nameOffset - 1);
             include = Optional.of(value);
             collectAttributes = true;
@@ -80,8 +80,8 @@ class IncludeMarkupHandler extends AbstractMarkupHandler {
         throws ParseException {
 
         if (collectAttributes) {
-            final IncludedService includedService = include.get();
-            includedService.put(new String(buffer, nameOffset, nameLen),
+            final IncludedService.Builder includedService = include.get();
+            includedService.attribute(new String(buffer, nameOffset, nameLen),
                 new String(buffer, valueContentOffset, valueContentLen));
         } else {
             next.handleAttribute(buffer, nameOffset, nameLen, nameLine, nameCol, operatorOffset, operatorLen,
@@ -107,10 +107,10 @@ class IncludeMarkupHandler extends AbstractMarkupHandler {
         final int col)
         throws ParseException {
         if (isIncludeElement(buffer, nameOffset, nameLen) && include.isPresent()) {
-            final IncludedService value = include.get();
+            final IncludedService.Builder value = include.get();
             value.endOffset(nameOffset + nameLen + 1);
             value.fallback(fallbackWriter.toString());
-            includedServices.add(value);
+            includedServices.add(value.build());
             include = Optional.empty();
 
             // Reset the chain

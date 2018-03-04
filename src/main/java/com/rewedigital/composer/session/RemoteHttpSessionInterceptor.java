@@ -17,6 +17,10 @@ import com.typesafe.config.Config;
 
 import okio.ByteString;
 
+/**
+ * A {@link SessionHandler.Interceptor} that <code>POST</code>s the session data to a configured endpoint and takes the
+ * response as updated session.
+ */
 public class RemoteHttpSessionInterceptor implements SessionHandler.Interceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RemoteHttpSessionInterceptor.class);

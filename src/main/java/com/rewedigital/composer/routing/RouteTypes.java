@@ -4,6 +4,9 @@ import java.util.Objects;
 
 import com.rewedigital.composer.composing.ComposerFactory;
 
+/**
+ * Factory creating a {@link RouteType} instance to handle a specific route type.
+ */
 public class RouteTypes {
 
     private final ComposerFactory composerFactory;

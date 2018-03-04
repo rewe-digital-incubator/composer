@@ -13,6 +13,9 @@ import org.slf4j.LoggerFactory;
 import com.spotify.apollo.RequestContext;
 import com.typesafe.config.Config;
 
+/**
+ * A {@link SessionHandler.Interceptor} that assigns a session id and manages a time to live.
+ */
 public class LocalSessionIdInterceptor implements SessionHandler.Interceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalSessionIdInterceptor.class);

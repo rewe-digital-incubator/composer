@@ -7,6 +7,27 @@ import java.util.stream.Collectors;
 
 import com.rewedigital.composer.session.SessionFragment;
 
+/**
+ * Contains the data of a (partial) composition.
+ *
+ * As the composition of content fragment into a web page is done recursively, this class describes one <em>sub
+ * tree</em> of the final composition. Compositions are created leaf to root meaning, that first Composition objects for
+ * the leafs are created, than the Composition for the parents and so on until the root Composition representing the
+ * whole page is created.
+ *
+ * The composition can be mapped to some result using {@link #map(BiFunction)}. The argument function takes two
+ * arguments: the composed html body and the composed session. These values are calculated lazily.
+ *
+ * Regarding the html content, a Composition consists of the following:
+ * <ul>
+ * <li>The {@link #template} - this is the html template this Composition represents. It may contain one or more include
+ * tags, for each of them a child Composition is available in {@link #children}</li>
+ * <li>The {@link #contentRange} - this is the range of the template that should be included into the
+ * <em>parent</em></li>
+ * <li>The interval {@link #startOffset}, {@link #endOffset} - this describes the part of the <em>parent</em> that
+ * should be replaced with <em>this</em> Composition</li>
+ * </ul>
+ */
 class Composition {
 
     private final List<Composition> children;
@@ -49,6 +70,10 @@ class Composition {
         return new Composition(template, contentRange, assetLinks, children);
     }
 
+    public <R> R map(final BiFunction<String, SessionFragment, R> mapping) {
+        return mapping.apply(withAssetLinks(body()), mergedSession());
+    }
+
     private String body() {
         final StringWriter writer = new StringWriter(template.length());
         int currentIndex = contentRange.start();
@@ -60,10 +85,6 @@ class Composition {
         }
         writer.write(template, currentIndex, contentRange.end() - currentIndex);
         return writer.toString();
-    }
-
-    public <R> R map(final BiFunction<String, SessionFragment, R> responseBuilder) {
-        return responseBuilder.apply(withAssetLinks(body()), mergedSession());
     }
 
     private SessionFragment mergedSession() {

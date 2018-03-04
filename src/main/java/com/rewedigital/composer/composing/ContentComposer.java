@@ -4,6 +4,11 @@ import java.util.concurrent.CompletableFuture;
 
 import com.spotify.apollo.Response;
 
+/**
+ * Content composer provides the interface to execute the composition of a content fragment.
+ */
 interface ContentComposer {
-    CompletableFuture<Composition> composeContent(final Response<String> templateResponse, final CompositionStep step);
+
+    CompletableFuture<Composition> composeContent(Response<String> contentResponse, CompositionStep step);
+
 }

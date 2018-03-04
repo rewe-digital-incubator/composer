@@ -11,6 +11,10 @@ import com.rewedigital.composer.session.SessionFragment;
 import com.rewedigital.composer.session.SessionRoot;
 import com.spotify.apollo.Response;
 
+/**
+ * Implements the composer interfaces using the <code>atto parser</code> to parse html documents to identify include and
+ * content tags.
+ */
 public class AttoParserBasedComposer implements ContentComposer, TemplateComposer {
 
     private final ContentFetcher contentFetcher;

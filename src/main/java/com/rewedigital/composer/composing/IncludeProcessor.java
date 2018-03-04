@@ -7,6 +7,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Processes a list of includes by fetching the content for each include and building a composition object that
+ * describes the composition of the template containing the includes and the content fetched.
+ */
 class IncludeProcessor {
 
     private final List<IncludedService> includedServices;

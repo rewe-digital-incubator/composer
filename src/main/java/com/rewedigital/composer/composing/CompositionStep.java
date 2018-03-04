@@ -1,5 +1,10 @@
 package com.rewedigital.composer.composing;
 
+/**
+ * Describes a step in the composition process. The composition is done recursively, and steps are created root to leaf.
+ * It is used to trace the progress of the recursive composition. The composition data itself is handled via
+ * {@link Composition}.
+ */
 public class CompositionStep {
 
     private static final CompositionStep root = new CompositionStep(null, "", 0);

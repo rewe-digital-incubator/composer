@@ -7,6 +7,14 @@ import java.util.Optional;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 
+/**
+ * Describes the <em>root</em> session of a request. The root session is constructed from a data map, can be written as
+ * a set of http headers to a request and can be updated ({@link #mergedWith(SessionFragment)}) with data from a
+ * {@link SessionFragment}. A root session is dirty if after a merge the data has changed.
+ *
+ * A root session can be written to a response using an instance of a {@link SessionRoot.Serializer}.
+ *
+ */
 public class SessionRoot {
 
     public interface Serializer {

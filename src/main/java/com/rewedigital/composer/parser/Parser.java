@@ -23,7 +23,6 @@ public class Parser {
         return htmlConfiguration;
     }
 
-
     public void parse(final String template, final IMarkupHandler markupHandler) {
         Objects.requireNonNull(template);
         Objects.requireNonNull(markupHandler);

@@ -9,6 +9,9 @@ import com.spotify.apollo.RequestContext;
 
 import okio.ByteString;
 
+/**
+ * {@link RouteType} <em>proxy</em> just proxies the request to the routing target.
+ */
 public class ProxyRoute implements RouteType {
 
     private final SessionAwareProxyClient templateClient;

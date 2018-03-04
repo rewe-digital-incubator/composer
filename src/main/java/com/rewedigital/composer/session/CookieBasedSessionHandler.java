@@ -26,6 +26,9 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+/**
+ * Implementation of a {@link SessionHandler} that stores a session as an encrypted <em>JWT</em> cookie.
+ */
 public class CookieBasedSessionHandler extends SessionHandler {
 
     public static class Factory implements SessionHandlerFactory {

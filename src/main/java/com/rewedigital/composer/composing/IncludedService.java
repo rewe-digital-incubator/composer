@@ -9,9 +9,47 @@ import org.slf4j.LoggerFactory;
 
 import com.spotify.apollo.Response;
 
+/**
+ * Describes the include parsed from a template. It contains the start and end offsets of the include element in the
+ * template for further processing in a {@link Composition}.
+ *
+ * An included service can {@link #fetch(ContentFetcher, CompositionStep)} the content using a {@link ContentFetcher}
+ * creating an instance of {@link IncludedService.WithResponse} that holds the response.
+ */
 class IncludedService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IncludedService.class);
+
+    public static class Builder {
+        private int startOffset;
+        private int endOffset;
+        private final Map<String, String> attributes = new HashMap<>();
+        private String fallback;
+
+        public Builder startOffset(final int startOffset) {
+            this.startOffset = startOffset;
+            return this;
+        }
+
+        public Builder endOffset(final int endOffset) {
+            this.endOffset = endOffset;
+            return this;
+        }
+
+        public Builder attribute(final String name, final String value) {
+            attributes.put(name, value);
+            return this;
+        }
+
+        public Builder fallback(final String fallback) {
+            this.fallback = fallback;
+            return this;
+        }
+
+        public IncludedService build() {
+            return new IncludedService(this);
+        }
+    }
 
     public static class WithResponse {
         private final int startOffset;
@@ -38,26 +76,18 @@ class IncludedService {
         }
     }
 
-    private int startOffset;
-    private int endOffset;
-    private final Map<String, String> attributes = new HashMap<>();
-    private String fallback;
+    private final int startOffset;
+    private final int endOffset;
+    private final Map<String, String> attributes;
+    private final String fallback;
 
-    public void startOffset(final int startOffset) {
-        this.startOffset = startOffset;
+    private IncludedService(final Builder builder) {
+        this.startOffset = builder.startOffset;
+        this.endOffset = builder.endOffset;
+        this.attributes = new HashMap<>(builder.attributes);
+        this.fallback = builder.fallback;
     }
 
-    public void endOffset(final int endOffset) {
-        this.endOffset = endOffset;
-    }
-
-    public void put(final String name, final String value) {
-        attributes.put(name, value);
-    }
-
-    public void fallback(final String fallback) {
-        this.fallback = fallback;
-    }
 
     public CompletableFuture<IncludedService.WithResponse> fetch(final ContentFetcher fetcher,
         final CompositionStep parentStep) {

@@ -11,9 +11,23 @@ import java.util.function.BinaryOperator;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
+import com.typesafe.config.Config;
 
+/**
+ * Handles the session lifecycle by
+ * <ul>
+ * <li>initializing a {@link SessionRoot} from an incoming request</li>
+ * <li>processing the session via a chain of {@link SessionHandler.Interceptor}s</li>
+ * <li>storing a merged {@link SessionRoot} for an outgoing request</li>
+ * </ul>
+ */
 public abstract class SessionHandler implements SessionRoot.Serializer {
 
+    /**
+     * Runs after a session is initializes and is able to modify the session before the request is processed. Instances
+     * can be configured via the configuration ({@link SessionConfiguration}). As instances are constructed via
+     * reflection, a constructor taking a single {@link Config} object must be present.
+     */
     public interface Interceptor {
         CompletionStage<SessionRoot> afterCreation(SessionRoot session, RequestContext context);
     }
