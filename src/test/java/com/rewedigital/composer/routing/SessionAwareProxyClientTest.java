@@ -8,7 +8,6 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.Test;
 
-import com.rewedigital.composer.routing.SessionAwareProxyClient;
 import com.rewedigital.composer.session.ResponseWithSession;
 import com.rewedigital.composer.session.Sessions;
 import com.spotify.apollo.Client;
@@ -52,13 +51,4 @@ public class SessionAwareProxyClientTest {
         when(client.send(request)).thenReturn(CompletableFuture.completedFuture(response));
         return client;
     }
-
-
-    /*
-     * return context.requestScopedClient() .send(session.enrich(Request.forUri(path, context.request().method())))
-     * .thenApply(r -> new ResponseWithSession<>(r, session.mergedWith(SessionFragment.of(r))));
-     * 
-     */
-
-
 }
