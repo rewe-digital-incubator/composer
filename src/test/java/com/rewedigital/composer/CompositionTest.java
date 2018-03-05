@@ -13,9 +13,12 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
+import com.spotify.apollo.StatusType;
 import com.spotify.apollo.test.ServiceHelper;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
+import com.squareup.okhttp.mockwebserver.SocketPolicy;
 
 import okio.ByteString;
 
@@ -25,20 +28,29 @@ public class CompositionTest {
     public final MockWebServer server = new MockWebServer();
 
     @Rule
-    public ServiceHelper serviceHelper =
-        ServiceHelper.create(ComposerApplication.Initializer::init, "composer")
-            .conf("composer.routing.local-routes", routesConfig(mockServerUrl()))
-            .conf("composer.html.include-tag", "include")
-            .conf("composer.html.content-tag", "content");
+    public ServiceHelper serviceHelper = ComposerApplication.bootstrap(ServiceHelper::create, (s, m) -> s.withModule(m))
+        .conf("composer.routing.local-routes", routesConfig(mockServerUrl()))
+        .conf("composer.html.include-tag", "include")
+        .conf("composer.html.content-tag", "content")
+        .conf("http.client.readTimeout", 500);
 
     @Test
     public void parsesMasterTemplateAndCombinesWithChildTemplate() throws Exception {
-        mockMicroServices();
+        mockUpstreamServices(templateResponse(), contentResponse());
 
         final CompletionStage<Response<ByteString>> composedFuture = serviceHelper.request("GET", "/compose");
         assertThat(responseBody(composedFuture)).isEqualTo(expectedComposedResponse());
     }
-    
+
+    @Test
+    public void handlesErrorInTemplateRequestByMappingToErrorResponse() throws Exception {
+        mockUpstreamServices(noResponse());
+
+        final CompletionStage<Response<ByteString>> composedFuture = serviceHelper.request("GET", "/compose");
+        assertThat(status(composedFuture)).isEqualTo(Status.INTERNAL_SERVER_ERROR);
+
+    }
+
     private String expectedComposedResponse() {
         return "template+content";
     }
@@ -48,21 +60,34 @@ public class CompositionTest {
         return composedFuture.toCompletableFuture().get().payload().get().utf8();
     }
 
-    private void mockMicroServices() {
-        server.enqueue(
-            new MockResponse().setBody("template+<include path=\"" + mockServerUrl() + "\"></include>")
-        );
-        
-        server.enqueue(
-            new MockResponse().setBody("<content>content</content>").setHeader("Content-Type", "text/html")
-        );
+    private StatusType status(final CompletionStage<Response<ByteString>> composedFuture)
+        throws InterruptedException, ExecutionException {
+        return composedFuture.toCompletableFuture().get().status();
+    }
+
+    private void mockUpstreamServices(final MockResponse... mockResponses) {
+        for (final MockResponse response : mockResponses) {
+            server.enqueue(response);
+        }
+    }
+
+    private MockResponse contentResponse() {
+        return new MockResponse().setBody("<content>content</content>").setHeader("Content-Type", "text/html");
+    }
+
+    private MockResponse templateResponse() {
+        return new MockResponse().setBody("template+<include path=\"" + mockServerUrl() + "\"></include>");
+    }
+
+    private MockResponse noResponse() {
+        return new MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE);
     }
 
     private String mockServerUrl() {
         return server.url("/").toString();
     }
 
-    private List<Map<String, Object>> routesConfig(final String templateService) {
+    private static List<Map<String, Object>> routesConfig(final String templateService) {
         final Map<String, Object> route = new HashMap<>();
         route.put("path", "/compose");
         route.put("method", "GET");

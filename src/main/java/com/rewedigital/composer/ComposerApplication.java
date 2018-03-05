@@ -2,19 +2,23 @@ package com.rewedigital.composer;
 
 import static com.rewedigital.composer.configuration.DefaultConfiguration.withDefaults;
 
-import com.rewedigital.composer.client.ClientDecoratingModule;
-import com.rewedigital.composer.client.ErrorClientDecorator;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.BiFunction;
+
+import com.rewedigital.composer.client.ErrorHandlingClientDecoratingModule;
 import com.rewedigital.composer.composing.ComposerFactory;
 import com.rewedigital.composer.proxy.ComposingRequestHandler;
 import com.rewedigital.composer.routing.BackendRouting;
 import com.rewedigital.composer.routing.RouteTypes;
 import com.rewedigital.composer.routing.SessionAwareProxyClient;
 import com.rewedigital.composer.session.CookieBasedSessionHandler;
+import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.core.Service;
-import com.spotify.apollo.http.client.HttpClientModule;
 import com.spotify.apollo.httpservice.HttpService;
 import com.spotify.apollo.httpservice.LoadingException;
+import com.spotify.apollo.module.ApolloModule;
 import com.spotify.apollo.route.Route;
 import com.typesafe.config.Config;
 
@@ -25,12 +29,25 @@ public class ComposerApplication {
     }
 
     private static Service bootstrapService() {
-        return HttpService
-            .usingAppInit(Initializer::init, "composer")
-            .withEnvVarPrefix("COMPOSER")
-            .withModule(HttpClientModule.create())
-            .withModule(ClientDecoratingModule.create(new ErrorClientDecorator()))
-            .build();
+        return bootstrap(
+            HttpService::usingAppInit,
+            (b, m) -> b.withModule(m))
+                .withEnvVarPrefix("COMPOSER")
+                .build();
+    }
+
+    static <T> T bootstrap(final BiFunction<AppInit, String, T> init,
+        final BiFunction<T, ApolloModule, T> moduleAppender) {
+        T result = init.apply(Initializer::init, "composer");
+        for (final ApolloModule module : additionalModules()) {
+            result = moduleAppender.apply(result, module);
+        }
+        return result;
+    }
+
+    private static List<ApolloModule> additionalModules() {
+        return Arrays.asList(
+            ErrorHandlingClientDecoratingModule.create());
     }
 
     static class Initializer {
