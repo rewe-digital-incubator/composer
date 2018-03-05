@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import com.spotify.apollo.route.Rule;
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigList;
 import com.typesafe.config.ConfigValue;
 
@@ -36,16 +35,11 @@ public class RoutingConfiguration {
         final String type = config.getString("type");
         final String target = config.getString("target");
 
-        try {
-            final Rule<Match> result = Rule.fromUri(path, method, Match.of(target, RouteTypeName.valueOf(type)));
-            LOGGER.info("Registered local route for path={}, method={}, target={}, type={}", path, method,
-                target, type);
-            return result;
-        } catch (final Exception ex) {
-            throw new ConfigException.Generic(String.format(
-                "could not construct local route from path=%s, method=%s, target=%s, type=%s", path, method,
-                target, type), ex);
-        }
+        final Rule<Match> result = Rule.fromUri(path, method, Match.of(target, RouteTypeName.valueOf(type)));
+        LOGGER.info("Registered local route for path={}, method={}, target={}, type={}", path, method,
+            target, type);
+        return result;
+
     }
 
     public List<Rule<Match>> localRules() {

@@ -4,6 +4,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +21,7 @@ import com.spotify.apollo.Environment;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
-import com.squareup.okhttp.CacheControl;
+import com.spotify.ffwd.http.okhttp3.CacheControl;
 import com.typesafe.config.Config;
 
 import okio.ByteString;
@@ -58,32 +60,45 @@ public class HttpCache {
             return client.send(request, incoming);
         }
 
-        // TODO how to handle incoming request?
-        final String cacheKey = cacheKey(request);
+        final String cacheKey = request.uri();
+        return queryCache(cacheKey)
+            .map(returnCachedResponse(cacheKey))
+            .orElseGet(fetchFromUpstream(request, incoming, client, cacheKey));
+    }
+
+    private Optional<Response<ByteString>> queryCache(final String cacheKey) {
         LOGGER.debug("querying cache for {}", cacheKey);
-        return Optional.ofNullable(cache.getIfPresent(cacheKey))
-            .map(response -> {
-                LOGGER.debug("serving response for cache key {} from cache (response: {})", cacheKey, response);
-                return (CompletionStage<Response<ByteString>>) CompletableFuture.completedFuture(response);
-            }).orElseGet(() -> client.send(request, incoming).whenComplete((response, ex) -> {
-                LOGGER.debug("fetched response for cache key {} for future caching if admissible (response: {})",
-                    cacheKey, response);
-                if (response != null) {
-                    cacheIfAdmissible(cacheKey, response);
-                }
-            }));
+        return Optional.ofNullable(cache.getIfPresent(cacheKey));
+    }
+
+    private Function<Response<ByteString>, CompletionStage<Response<ByteString>>> returnCachedResponse(
+        final String cacheKey) {
+        return response -> {
+            LOGGER.debug("serving response for cache key {} from cache (response: {})", cacheKey, response);
+            return CompletableFuture.completedFuture(response);
+        };
+    }
+
+    private Supplier<CompletionStage<Response<ByteString>>> fetchFromUpstream(final Request request,
+        final Optional<Request> incoming, final IncomingRequestAwareClient client, final String cacheKey) {
+        return () -> client
+            .send(request, incoming)
+            .whenComplete((response, ex) -> {
+                LOGGER.debug("fetched response for cache key {} (response: {})", cacheKey, response);
+                cacheIfAdmissible(cacheKey, response);
+            });
     }
 
     private void cacheIfAdmissible(final String cacheKey, final Response<ByteString> response) {
         final CacheControl cacheControl = CacheHeaders.of(response);
-        if (!cacheControl.noCache() && !cacheControl.noStore() && cacheControl.maxAgeSeconds() > 0) {
+        if (isAdmissibleForCaching(cacheControl)) {
             LOGGER.debug("caching response for cache key {}, max age: {}", cacheKey, cacheControl.maxAgeSeconds());
             cache.put(cacheKey, response);
         }
     }
 
-    private String cacheKey(final Request request) {
-        return request.uri();
+    private boolean isAdmissibleForCaching(final CacheControl cacheControl) {
+        return !cacheControl.noCache() && !cacheControl.noStore() && cacheControl.maxAgeSeconds() > 0;
     }
 
     private static Expiry<String, Response<ByteString>> cacheHeaderBasedExpiry() {

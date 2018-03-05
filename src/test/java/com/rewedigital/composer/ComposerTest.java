@@ -22,7 +22,7 @@ import com.squareup.okhttp.mockwebserver.SocketPolicy;
 
 import okio.ByteString;
 
-public class CompositionTest {
+public class ComposerTest {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
