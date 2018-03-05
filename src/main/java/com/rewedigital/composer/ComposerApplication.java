@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 
+import com.rewedigital.composer.caching.HttpCacheModule;
 import com.rewedigital.composer.client.ErrorHandlingClientDecoratingModule;
 import com.rewedigital.composer.composing.ComposerFactory;
 import com.rewedigital.composer.proxy.ComposingRequestHandler;
@@ -47,7 +48,7 @@ public class ComposerApplication {
 
     private static List<ApolloModule> additionalModules() {
         return Arrays.asList(
-            ErrorHandlingClientDecoratingModule.create());
+            ErrorHandlingClientDecoratingModule.create(), HttpCacheModule.create());
     }
 
     static class Initializer {

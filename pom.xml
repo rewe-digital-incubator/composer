@@ -8,7 +8,7 @@
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
-        
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -17,10 +17,12 @@
         <handy-uri-templates.version>2.1.6</handy-uri-templates.version>
         <jjwt.version>0.9.0</jjwt.version>
         <jaxb.version>2.3.0</jaxb.version>
+        <caffeine.version>2.6.2</caffeine.version>
 
         <assertj-core.version>3.8.0</assertj-core.version>
         <code-assert.version>0.8.5</code-assert.version>
         <mockwebserver.version>2.5.0</mockwebserver.version>
+        <guava-testlib.version>23.6-jre</guava-testlib.version>
     </properties>
 
     <dependencies>
@@ -43,6 +45,10 @@
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
         </dependency>
 
         <!-- Test support -->
@@ -76,6 +82,11 @@
             <artifactId>mockwebserver</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava-testlib</artifactId>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
@@ -104,6 +115,11 @@
                 <version>${jjwt.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj-core.version}</version>
@@ -122,6 +138,12 @@
                 <groupId>javax.xml.bind</groupId>
                 <artifactId>jaxb-api</artifactId>
                 <version>${jaxb.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava-testlib</artifactId>
+                <version>${guava-testlib.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

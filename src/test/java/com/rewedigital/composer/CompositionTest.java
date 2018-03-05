@@ -29,10 +29,10 @@ public class CompositionTest {
 
     @Rule
     public ServiceHelper serviceHelper = ComposerApplication.bootstrap(ServiceHelper::create, (s, m) -> s.withModule(m))
-        .conf("composer.routing.local-routes", routesConfig(mockServerUrl()))
+        .conf("composer.routing.local-routes", routesConfig(mockTemplateServerUrl()))
         .conf("composer.html.include-tag", "include")
         .conf("composer.html.content-tag", "content")
-        .conf("http.client.readTimeout", 500);
+        .conf("http.client.readTimeout", 1000);
 
     @Test
     public void parsesMasterTemplateAndCombinesWithChildTemplate() throws Exception {
@@ -48,7 +48,17 @@ public class CompositionTest {
 
         final CompletionStage<Response<ByteString>> composedFuture = serviceHelper.request("GET", "/compose");
         assertThat(status(composedFuture)).isEqualTo(Status.INTERNAL_SERVER_ERROR);
+    }
 
+    @Test
+    public void servesCachableTemplateFromCache() throws Exception {
+        mockUpstreamServices(templateResponse().addHeader("Cache-Control", "max-age=50"), contentResponse(),
+            contentResponse());
+
+        serviceHelper.request("GET", "/compose").toCompletableFuture().get();
+
+        final CompletionStage<Response<ByteString>> composedFuture = serviceHelper.request("GET", "/compose");
+        assertThat(responseBody(composedFuture)).isEqualTo(expectedComposedResponse());
     }
 
     private String expectedComposedResponse() {
@@ -76,15 +86,20 @@ public class CompositionTest {
     }
 
     private MockResponse templateResponse() {
-        return new MockResponse().setBody("template+<include path=\"" + mockServerUrl() + "\"></include>");
+        return new MockResponse().setBody("template+<include path=\"" + mockContentServerUrl() + "\"></include>")
+            .setHeader("Content-Type", "text/html");
     }
 
     private MockResponse noResponse() {
         return new MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE);
     }
 
-    private String mockServerUrl() {
+    private String mockTemplateServerUrl() {
         return server.url("/").toString();
+    }
+
+    private String mockContentServerUrl() {
+        return server.url("/content/").toString();
     }
 
     private static List<Map<String, Object>> routesConfig(final String templateService) {

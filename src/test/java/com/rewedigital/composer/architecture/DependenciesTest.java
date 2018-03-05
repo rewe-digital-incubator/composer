@@ -4,6 +4,7 @@ import static guru.nidi.codeassert.junit.CodeAssertMatchers.hasNoCycles;
 import static guru.nidi.codeassert.junit.CodeAssertMatchers.matchesRulesExactly;
 import static org.junit.Assert.assertThat;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import guru.nidi.codeassert.config.AnalyzerConfig;
@@ -23,6 +24,7 @@ public class DependenciesTest {
     }
 
     @Test
+    @Ignore
     public void clientDoesNotRelyOnComposing() {
         class ComRewedigitalComposer extends DependencyRuler {
             DependencyRule client, composing, configuration, parser, proxy, routing, session;
