@@ -27,6 +27,9 @@ public class DefaultConfiguration {
         result.put("composer.html.asset-options-attribute", "data-rd-options");
         result.put("composer.html.max-recursion", 5);
 
+        result.put("composer.http.cache.enabled", true);
+        result.put("composer.http.cache.size", 10_000);
+
         result.put("composer.session.enabled", Boolean.TRUE);
         result.put("composer.session.cookie", "rdsession");
         result.put("composer.session.signing-algorithm", "HS512");

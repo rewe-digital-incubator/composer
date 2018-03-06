@@ -8,7 +8,6 @@ import java.util.concurrent.CompletionStage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -54,8 +53,8 @@ public class RemoteHttpSessionInterceptor implements SessionHandler.Interceptor 
         try {
             final String payload = objectMapper.writeValueAsString(session.rawData());
             return ByteString.encodeUtf8(payload);
-        } catch (final JsonProcessingException e) {
-            LOGGER.error("could not write json payload for session");
+        } catch (final IOException ex) {
+            LOGGER.error("could not write json payload for session", ex);
             return ByteString.encodeUtf8("{}");
         }
     }
@@ -64,8 +63,8 @@ public class RemoteHttpSessionInterceptor implements SessionHandler.Interceptor 
     private Map<String, String> parse(final String payload) {
         try {
             return objectMapper.readValue(payload, Map.class);
-        } catch (final IOException e) {
-            LOGGER.error("Could not read json response {}", payload);
+        } catch (final IOException ex) {
+            LOGGER.error("Could not read json response {}", payload, ex);
             return Collections.emptyMap();
         }
     }
