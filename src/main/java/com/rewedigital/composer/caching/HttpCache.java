@@ -25,6 +25,16 @@ import com.spotify.ffwd.http.okhttp3.CacheControl;
 
 import okio.ByteString;
 
+/**
+ * <code>HttpCache</code> is a simple, {@link Caffeine}-based cache for http responses.
+ *
+ * <p>
+ * It evaluates cache-control headers of responses and caches them accordingly. It also evaluates cache-control headers
+ * of the request to for example bypass the cache if &quot;no-cache&quot; is send.
+ *
+ * <p>
+ * The cache is inserted into request processing via the {@link CachingClientDecorator}.
+ */
 public class HttpCache {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpCache.class);
 
