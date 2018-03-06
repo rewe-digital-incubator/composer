@@ -22,7 +22,6 @@ import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
 import com.spotify.ffwd.http.okhttp3.CacheControl;
-import com.typesafe.config.Config;
 
 import okio.ByteString;
 
@@ -30,7 +29,7 @@ public class HttpCache {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpCache.class);
 
     private final Cache<String, Response<ByteString>> cache;
-    final boolean enabled;
+    private final HttpCacheConfiguration configuration;
 
     @Inject
     public HttpCache(final Provider<Environment> environmentProvider) {
@@ -39,16 +38,15 @@ public class HttpCache {
 
     @VisibleForTesting
     HttpCache(final Provider<Environment> environmentProvider, final Ticker ticker) {
-        final Config config = environmentProvider.get().config();
-        enabled = config.getBoolean("composer.http.cache.enabled");
-        if (!enabled) {
+        this.configuration =
+            HttpCacheConfiguration.fromConfig(environmentProvider.get().config().getConfig("composer.http.cache"));
+        if (!configuration.enabled()) {
             cache = null;
             return;
         }
 
-        final int size = config.getInt("composer.http.cache.size");
         cache = Caffeine.newBuilder()
-            .maximumSize(size)
+            .maximumSize(configuration.size())
             .ticker(ticker)
             .expireAfter(cacheHeaderBasedExpiry())
             .build();
@@ -56,18 +54,24 @@ public class HttpCache {
 
     public CompletionStage<Response<ByteString>> withCaching(final Request request, final Optional<Request> incoming,
         final IncomingRequestAwareClient client) {
-        if (!enabled) {
+        if (!configuration.enabled()) {
             return client.send(request, incoming);
         }
 
         final String cacheKey = request.uri();
-        return queryCache(cacheKey)
+        return queryCache(cacheKey, request)
             .map(returnCachedResponse(cacheKey))
-            .orElseGet(fetchFromUpstream(request, incoming, client, cacheKey));
+            .orElseGet(fetchFromUpstream(cacheKey, request, incoming, client));
     }
 
-    private Optional<Response<ByteString>> queryCache(final String cacheKey) {
+    private Optional<Response<ByteString>> queryCache(final String cacheKey, final Request request) {
         LOGGER.debug("querying cache for {}", cacheKey);
+        final CacheControl cacheControl = CacheHeaders.of(request);
+        if (cacheControl.noCache()) {
+            LOGGER.debug("bypassing cache for {} due to no-cache header", cacheKey);
+            return Optional.empty();
+        }
+
         return Optional.ofNullable(cache.getIfPresent(cacheKey));
     }
 
@@ -79,8 +83,8 @@ public class HttpCache {
         };
     }
 
-    private Supplier<CompletionStage<Response<ByteString>>> fetchFromUpstream(final Request request,
-        final Optional<Request> incoming, final IncomingRequestAwareClient client, final String cacheKey) {
+    private Supplier<CompletionStage<Response<ByteString>>> fetchFromUpstream(final String cacheKey,
+        final Request request, final Optional<Request> incoming, final IncomingRequestAwareClient client) {
         return () -> client
             .send(request, incoming)
             .whenComplete((response, ex) -> {

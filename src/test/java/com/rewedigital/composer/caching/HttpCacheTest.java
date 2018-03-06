@@ -118,6 +118,20 @@ public class HttpCacheTest {
         cache.withCaching(request, Optional.empty(), client);
     }
 
+    @Test
+    public void bypassesCacheIfRequestSendsNoCacheHeader() {
+        final HttpCache cache = new HttpCache(env());
+        final IncomingRequestAwareClient client = aClientReturning(aResponseWith("max-age=100"));
+        final Request request = Request.forUri("/");
+        cache.withCaching(request, Optional.empty(), client);
+
+        final Request noCacheRequest = request.withHeader("Cache-Control", "no-cache");
+        cache.withCaching(noCacheRequest, Optional.empty(), client);
+
+        verify(client, times(1)).send(request, Optional.empty());
+        verify(client, times(1)).send(noCacheRequest, Optional.empty());
+    }
+
     private Response<ByteString> aResponseWith(final String value) {
         return Response.of(Status.OK, ByteString.EMPTY).withHeader("Cache-Control", value);
     }
@@ -142,5 +156,4 @@ public class HttpCacheTest {
     private static Config config() {
         return ConfigFactory.empty();
     }
-
 }
