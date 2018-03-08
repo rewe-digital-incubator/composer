@@ -30,6 +30,11 @@ import com.rewedigital.composer.session.SessionFragment;
  */
 class Composition {
 
+    @FunctionalInterface
+    public interface Extractor<T> {
+        public T extract(String body, SessionFragment session);
+    }
+
     private final List<Composition> children;
     private final List<String> assetLinks;
     private final int startOffset;
@@ -72,6 +77,10 @@ class Composition {
 
     public <R> R map(final BiFunction<String, SessionFragment, R> mapping) {
         return mapping.apply(withAssetLinks(body()), mergedSession());
+    }
+
+    public <R> R extract(Extractor<R> extractor) {
+        return extractor.extract(withAssetLinks(body()), mergedSession());
     }
 
     private String body() {
