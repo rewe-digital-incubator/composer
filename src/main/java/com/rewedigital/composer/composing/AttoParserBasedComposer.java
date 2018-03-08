@@ -34,7 +34,8 @@ public class AttoParserBasedComposer implements ContentComposer, TemplateCompose
         return parse(bodyOf(templateResponse), ContentRange.allUpToo(bodyOf(templateResponse).length()))
             .composeIncludes(contentFetcher, this, CompositionStep.root(templatePath))
             .thenApply(c -> c.withSession(SessionFragment.of(templateResponse)))
-            .thenApply(c -> c.extract(response()));
+            .thenApply(c -> c.extract(response()))
+            .thenApply(r -> r.transform(response -> response.withHeader("Cache-Control", "no-store,max-age=0")));
     }
 
     private Composition.Extractor<ResponseWithSession<String>> response() {

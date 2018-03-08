@@ -121,6 +121,19 @@ public class TemplateComposerTest {
             .get().response();
         assertThat(result.payload()).contains(fallbackContent);
     }
+    
+    @Test
+    public void setsNoStoreCacheHeaderIfNoCacheHeaderFromComposition() throws Exception{
+        final TemplateComposer composer = makeComposer(aClientWithSimpleContent("content"));
+
+        final Response<String> result = composer
+            .composeTemplate(r(
+                "template content <include path=\"http://mock/\"></include> more content"),
+                "template-path")
+            .get().response();
+
+        assertThat(result.header("Cache-Control")).contains("no-store,max-age=0");
+    }
 
     private TemplateComposer makeComposer(final Client client) {
         return makeComposerWithMaxRecursion(client, 10);
