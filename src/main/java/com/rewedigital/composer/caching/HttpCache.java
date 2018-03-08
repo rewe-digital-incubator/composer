@@ -1,5 +1,7 @@
 package com.rewedigital.composer.caching;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -37,6 +39,7 @@ import okio.ByteString;
  */
 public class HttpCache {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpCache.class);
+    private static final Collection<String> cachableMethods = Arrays.asList("GET", "HEAD");
 
     private final Cache<String, Response<ByteString>> cache;
     private final HttpCacheConfiguration configuration;
@@ -64,11 +67,11 @@ public class HttpCache {
 
     public CompletionStage<Response<ByteString>> withCaching(final Request request, final Optional<Request> incoming,
         final IncomingRequestAwareClient client) {
-        if (!configuration.enabled()) {
+        if (!configuration.enabled() || !cachableMethods.contains(request.method())) {
             return client.send(request, incoming);
         }
 
-        final String cacheKey = request.uri();
+        final String cacheKey = cacheKey(request);
         return queryCache(cacheKey, request)
             .map(returnCachedResponse(cacheKey))
             .orElseGet(fetchFromUpstream(cacheKey, request, incoming, client));
@@ -113,6 +116,10 @@ public class HttpCache {
 
     private boolean isAdmissibleForCaching(final CacheControl cacheControl) {
         return !cacheControl.noCache() && !cacheControl.noStore() && cacheControl.maxAgeSeconds() > 0;
+    }
+
+    private String cacheKey(final Request request) {
+        return request.method() + "_" + request.uri();
     }
 
     private static Expiry<String, Response<ByteString>> cacheHeaderBasedExpiry() {

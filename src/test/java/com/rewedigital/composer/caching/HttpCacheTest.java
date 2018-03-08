@@ -7,6 +7,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -130,6 +133,32 @@ public class HttpCacheTest {
 
         verify(client, times(1)).send(request, Optional.empty());
         verify(client, times(1)).send(noCacheRequest, Optional.empty());
+    }
+
+    @Test
+    public void onlyCachesResponsesToGetAndHeadRequests() {
+        final Map<String, Integer> methodToCalls = new HashMap<String, Integer>() {
+            private static final long serialVersionUID = 1L;
+            {
+                put("GET", 1);
+                put("HEAD", 1);
+                put("OPTION", 2);
+                put("POST", 2);
+                put("PUT", 2);
+                put("DELETE", 2);
+            }
+        };
+
+        final HttpCache cache = new HttpCache(env());
+        final IncomingRequestAwareClient client = aClientReturning(aResponseWith("max-age=100"));
+
+        for (Entry<String, Integer> m : methodToCalls.entrySet()) {
+            Request request = Request.forUri("/", m.getKey());
+            cache.withCaching(request, Optional.empty(), client);
+            cache.withCaching(request, Optional.empty(), client);
+
+            verify(client, times(m.getValue())).send(request, Optional.empty());
+        }
     }
 
     private Response<ByteString> aResponseWith(final String value) {
