@@ -22,6 +22,7 @@ import com.spotify.apollo.Environment;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
+import com.spotify.apollo.StatusType;
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -161,8 +162,43 @@ public class HttpCacheTest {
         }
     }
 
+    @Test
+    public void onlyCachesResponsesWithCacheableStatusCode() {
+        final Map<Status, Integer> statusToCalls = new HashMap<Status, Integer>() {
+            private static final long serialVersionUID = 1L;
+            {
+                put(Status.BAD_GATEWAY, 2);
+                put(Status.BAD_REQUEST, 2);
+                put(Status.CREATED, 2);
+                put(Status.FORBIDDEN, 2);
+                put(Status.INTERNAL_SERVER_ERROR, 2);
+                put(Status.SEE_OTHER, 2);
+                put(Status.TEMPORARY_REDIRECT, 2);
+
+                put(Status.OK, 1);
+                put(Status.GONE, 1);
+                put(Status.MOVED_PERMANENTLY, 1);
+            }
+        };
+
+        final HttpCache cache = new HttpCache(env());
+        for (Entry<Status, Integer> m : statusToCalls.entrySet()) {
+            final IncomingRequestAwareClient client = aClientReturning(aResponseWith(m.getKey(), "max-age=100"));
+
+            Request request = Request.forUri("/" + m.getKey(), "GET");
+            cache.withCaching(request, Optional.empty(), client);
+            cache.withCaching(request, Optional.empty(), client);
+
+            verify(client, times(m.getValue())).send(request, Optional.empty());
+        }
+    }
+
     private Response<ByteString> aResponseWith(final String value) {
-        return Response.of(Status.OK, ByteString.EMPTY).withHeader("Cache-Control", value);
+        return aResponseWith(Status.OK, value);
+    }
+
+    private Response<ByteString> aResponseWith(StatusType status, final String value) {
+        return Response.of(status, ByteString.EMPTY).withHeader("Cache-Control", value);
     }
 
     private IncomingRequestAwareClient aClientReturning(final Response<ByteString> response) {

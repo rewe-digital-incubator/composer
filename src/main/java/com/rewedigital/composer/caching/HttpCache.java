@@ -22,6 +22,8 @@ import com.google.inject.Provider;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
+import com.spotify.apollo.StatusType;
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
 import com.spotify.ffwd.http.okhttp3.CacheControl;
 
@@ -40,6 +42,8 @@ import okio.ByteString;
 public class HttpCache {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpCache.class);
     private static final Collection<String> cachableMethods = Arrays.asList("GET", "HEAD");
+    private static final Collection<StatusType> cachableStatusTypes =
+        Arrays.asList(Status.OK, Status.GONE, Status.MOVED_PERMANENTLY);
 
     private final Cache<String, Response<ByteString>> cache;
     private final HttpCacheConfiguration configuration;
@@ -108,14 +112,17 @@ public class HttpCache {
 
     private void cacheIfAdmissible(final String cacheKey, final Response<ByteString> response) {
         final CacheControl cacheControl = CacheHeaders.of(response);
-        if (isAdmissibleForCaching(cacheControl)) {
+        if (isAdmissibleForCaching(response.status(), cacheControl)) {
             LOGGER.debug("caching response for cache key {}, max age: {}", cacheKey, cacheControl.maxAgeSeconds());
             cache.put(cacheKey, response);
         }
     }
 
-    private boolean isAdmissibleForCaching(final CacheControl cacheControl) {
-        return !cacheControl.noCache() && !cacheControl.noStore() && cacheControl.maxAgeSeconds() > 0;
+    private boolean isAdmissibleForCaching(final StatusType responseStatus, final CacheControl cacheControl) {
+        return cachableStatusTypes.contains(responseStatus) &&
+            !cacheControl.noCache() &&
+            !cacheControl.noStore()
+            && cacheControl.maxAgeSeconds() > 0;
     }
 
     private String cacheKey(final Request request) {
