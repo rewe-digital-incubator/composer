@@ -35,6 +35,7 @@ public class AttoParserBasedComposer implements ContentComposer, TemplateCompose
             .composeIncludes(contentFetcher, this, CompositionStep.root(templatePath))
             .thenApply(c -> c.withSession(SessionFragment.of(templateResponse)))
             .thenApply(c -> c.extract(response()))
+            // temporary solution: correct cache-control header should be computed during composition
             .thenApply(r -> r.transform(response -> response.withHeader("Cache-Control", "no-store,max-age=0")));
     }
 

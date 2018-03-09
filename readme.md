@@ -84,7 +84,7 @@ If an include could not be resolved (for example, because the endpoint called fo
 
 ### HTTP Cache
 
-Composer can cache responses from upstream services according to their *cache-control* headers. The cache is activated via the configuration property `composer.htt.cache.enabled`. Under the hood, Composer uses [Caffeine](https://github.com/ben-manes/caffeine) as cache implementation. Each instance of Composer maintains it's own in-memory cache.
+Composer can cache responses from upstream services according to their *cache-control* headers. The cache is activated via the configuration property `composer.http.cache.enabled`. Under the hood, Composer uses [Caffeine](https://github.com/ben-manes/caffeine) as cache implementation. Each instance of Composer maintains it's own in-memory cache.
 
 Right now, Composer only caches resources with `max-age > 0`. Composer *does not* support conditional gets, thus, a resource with `no-cache` is simply not cached.
 

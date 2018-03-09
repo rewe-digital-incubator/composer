@@ -2,10 +2,12 @@ package com.rewedigital.composer.caching;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -41,9 +43,9 @@ import okio.ByteString;
  */
 public class HttpCache {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpCache.class);
-    private static final Collection<String> cachableMethods = Arrays.asList("GET", "HEAD");
-    private static final Collection<StatusType> cachableStatusTypes =
-        Arrays.asList(Status.OK, Status.GONE, Status.MOVED_PERMANENTLY);
+    private static final Collection<String> cachableMethods = new HashSet<>(Arrays.asList("GET", "HEAD"));
+    private static final Collection<StatusType> cachableStatusTypes = new HashSet<>(
+        Arrays.asList(Status.OK, Status.GONE, Status.MOVED_PERMANENTLY));
 
     private final Cache<String, Response<ByteString>> cache;
     private final HttpCacheConfiguration configuration;
@@ -71,58 +73,57 @@ public class HttpCache {
 
     public CompletionStage<Response<ByteString>> withCaching(final Request request, final Optional<Request> incoming,
         final IncomingRequestAwareClient client) {
-        if (!configuration.enabled() || !cachableMethods.contains(request.method())) {
+        if (bypassCache(request)) {
             return client.send(request, incoming);
         }
 
         final String cacheKey = cacheKey(request);
         return queryCache(cacheKey, request)
             .map(returnCachedResponse(cacheKey))
-            .orElseGet(fetchFromUpstream(cacheKey, request, incoming, client));
+            .orElseGet(fetchFromUpstream(request, incoming, client))
+            .whenComplete(cacheIfAdmissible(cacheKey));
+    }
+
+    private boolean bypassCache(final Request request) {
+        return !configuration.enabled() ||
+            !cachableMethods.contains(request.method()) ||
+            CacheHeaders.of(request).noCache();
     }
 
     private Optional<Response<ByteString>> queryCache(final String cacheKey, final Request request) {
-        LOGGER.debug("querying cache for {}", cacheKey);
-        final CacheControl cacheControl = CacheHeaders.of(request);
-        if (cacheControl.noCache()) {
-            LOGGER.debug("bypassing cache for {} due to no-cache header", cacheKey);
-            return Optional.empty();
-        }
-
+        LOGGER.debug("Querying cache for {}", cacheKey);
         return Optional.ofNullable(cache.getIfPresent(cacheKey));
     }
 
     private Function<Response<ByteString>, CompletionStage<Response<ByteString>>> returnCachedResponse(
         final String cacheKey) {
         return response -> {
-            LOGGER.debug("serving response for cache key {} from cache (response: {})", cacheKey, response);
+            LOGGER.debug("Serving response for cache key {} from cache (response: {})", cacheKey, response);
             return CompletableFuture.completedFuture(response);
         };
     }
 
-    private Supplier<CompletionStage<Response<ByteString>>> fetchFromUpstream(final String cacheKey,
-        final Request request, final Optional<Request> incoming, final IncomingRequestAwareClient client) {
-        return () -> client
-            .send(request, incoming)
-            .whenComplete((response, ex) -> {
-                LOGGER.debug("fetched response for cache key {} (response: {})", cacheKey, response);
-                cacheIfAdmissible(cacheKey, response);
-            });
+    private Supplier<CompletionStage<Response<ByteString>>> fetchFromUpstream(final Request request,
+        final Optional<Request> incoming, final IncomingRequestAwareClient client) {
+        return () -> client.send(request, incoming);
     }
 
-    private void cacheIfAdmissible(final String cacheKey, final Response<ByteString> response) {
-        final CacheControl cacheControl = CacheHeaders.of(response);
-        if (isAdmissibleForCaching(response.status(), cacheControl)) {
-            LOGGER.debug("caching response for cache key {}, max age: {}", cacheKey, cacheControl.maxAgeSeconds());
-            cache.put(cacheKey, response);
-        }
+    private BiConsumer<Response<ByteString>, Throwable> cacheIfAdmissible(final String cacheKey) {
+        return (response, ex) -> {
+            LOGGER.debug("Fetched response for cache key {} (response: {})", cacheKey, response);
+            final CacheControl cacheControl = CacheHeaders.of(response);
+            if (isAdmissibleForCaching(response.status(), cacheControl)) {
+                LOGGER.debug("caching response for cache key {}, max age: {}", cacheKey, cacheControl.maxAgeSeconds());
+                cache.put(cacheKey, response);
+            }
+        };
     }
 
     private boolean isAdmissibleForCaching(final StatusType responseStatus, final CacheControl cacheControl) {
         return cachableStatusTypes.contains(responseStatus) &&
             !cacheControl.noCache() &&
-            !cacheControl.noStore()
-            && cacheControl.maxAgeSeconds() > 0;
+            !cacheControl.noStore() &&
+            cacheControl.maxAgeSeconds() > 0;
     }
 
     private String cacheKey(final Request request) {
