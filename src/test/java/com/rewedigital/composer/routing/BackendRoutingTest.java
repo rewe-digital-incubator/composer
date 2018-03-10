@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.Optional;
 
 import org.junit.Test;
@@ -20,10 +21,11 @@ import com.spotify.apollo.route.Rule;
 public class BackendRoutingTest {
 
     private final SessionRoot emptySession = SessionRoot.empty();
+    private final Duration ttl = Duration.ZERO;
 
     @Test
     public void findsRouteForSimpleRule() {
-        final Rule<Match> simpleRule = Rule.fromUri("/", "GET", Match.of("http://test.com/", PROXY));
+        final Rule<Match> simpleRule = Rule.fromUri("/", "GET", Match.of("http://test.com/", ttl, PROXY));
         final BackendRouting backendRouting = new BackendRouting(ImmutableList.of(simpleRule));
 
         final Optional<RouteMatch> matchResult = backendRouting.matches(requestFor("GET", "/"), emptySession);
@@ -34,7 +36,7 @@ public class BackendRoutingTest {
     @Test
     public void findsRouteWithPathArguments() {
         final Rule<Match> ruleWithPath =
-            Rule.fromUri("/<someValue>", "GET", Match.of("http://test.com/{someValue}", PROXY));
+            Rule.fromUri("/<someValue>", "GET", Match.of("http://test.com/{someValue}", ttl, PROXY));
         final BackendRouting backendRouting = new BackendRouting(ImmutableList.of(ruleWithPath));
 
         final Optional<RouteMatch> matchResult = backendRouting.matches(requestFor("GET", "/123"), emptySession);
@@ -45,7 +47,7 @@ public class BackendRoutingTest {
 
     @Test
     public void findsNoRouteThatIsNotConfigured() {
-        final Rule<Match> simpleRule = Rule.fromUri("/", "GET", Match.of("http://test.com/", PROXY));
+        final Rule<Match> simpleRule = Rule.fromUri("/", "GET", Match.of("http://test.com/", ttl, PROXY));
         final BackendRouting backendRouting = new BackendRouting(ImmutableList.of(simpleRule));
 
         final Optional<RouteMatch> matchResult = backendRouting.matches(requestFor("PUT", "/"), emptySession);

@@ -1,7 +1,8 @@
-package com.rewedigital.composer.composing;
+package com.rewedigital.composer.composing.fetch;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.rewedigital.composer.composing.CompositionStep;
 import com.spotify.apollo.Response;
 
 /**
@@ -9,6 +10,6 @@ import com.spotify.apollo.Response;
  */
 public interface ContentFetcher {
 
-    CompletableFuture<Response<String>> fetch(String path, String fallback, CompositionStep step);
+    CompletableFuture<Response<String>> fetch(FetchContext fetchContext, CompositionStep step);
 
 }

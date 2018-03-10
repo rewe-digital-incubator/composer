@@ -8,6 +8,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -35,9 +36,10 @@ import com.spotify.apollo.route.Rule;
 
 import okio.ByteString;
 
-public class ComposingHandlerTest {
+public class ComposingRequestHandlerTest {
 
     private static final String SERVICE_RESPONSE = "<html>test</html>";
+    private final Duration ttl = Duration.ZERO;
 
     @Test
     public void returnsResponseFromTemplateRoute() throws Exception {
@@ -75,7 +77,7 @@ public class ComposingHandlerTest {
     }
 
     private BackendRouting aRouter(final String pattern, final RouteTypeName routeType) {
-        final Rule<Match> sampleRule = Rule.fromUri(pattern, "GET", Match.of("http://target", routeType));
+        final Rule<Match> sampleRule = Rule.fromUri(pattern, "GET", Match.of("http://target", ttl, routeType));
         return new BackendRouting(singletonList(sampleRule));
     }
 
@@ -93,13 +95,7 @@ public class ComposingHandlerTest {
     }
 
     private SessionHandlerFactory sessionSerializer() {
-        return new SessionHandlerFactory() {
-
-            @Override
-            public SessionHandler build() {
-                return SessionHandler.noSession();
-            }
-        };
+        return () -> SessionHandler.noSession();
     }
 
     private static class RoutingResult extends SessionAwareProxyClient {

@@ -1,5 +1,6 @@
 package com.rewedigital.composer.routing;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,9 +36,13 @@ public class RoutingConfiguration {
         final String type = config.getString("type");
         final String target = config.getString("target");
 
-        final Rule<Match> result = Rule.fromUri(path, method, Match.of(target, RouteTypeName.valueOf(type)));
-        LOGGER.info("Registered local route for path={}, method={}, target={}, type={}", path, method,
-            target, type);
+        // FIXME: Don't error out if none is configured use a sane default.
+        final Duration ttl = config.getDuration("ttl");
+
+        final Rule<Match> result = Rule.fromUri(path, method, Match.of(target, ttl, RouteTypeName.valueOf(type)));
+        LOGGER.info("Registered local route for path={}, method={}, target={}, type={} with a request ttl={}", path,
+            method,
+            target, type, ttl);
         return result;
 
     }

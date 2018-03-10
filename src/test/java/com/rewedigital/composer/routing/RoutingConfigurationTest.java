@@ -2,6 +2,7 @@ package com.rewedigital.composer.routing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,8 @@ import com.typesafe.config.ConfigFactory;
 
 public class RoutingConfigurationTest {
 
+    private final Duration ttl = Duration.ZERO;
+
     @Test
     public void allConfigParametersAreCoveredByDefaultConfig() {
         final RoutingConfiguration configuration =
@@ -35,7 +38,7 @@ public class RoutingConfigurationTest {
         assertThat(localRules).anySatisfy(rule -> {
             assertThat(rule.getPath()).isEqualTo("/test/path/<arg>");
             assertThat(rule.getMethods()).contains("GET");
-            assertThat(rule.getTarget()).isEqualTo(Match.of("https://target.service/{arg}", RouteTypeName.PROXY));
+            assertThat(rule.getTarget()).isEqualTo(Match.of("https://target.service/{arg}", ttl, RouteTypeName.PROXY));
         });
     }
 

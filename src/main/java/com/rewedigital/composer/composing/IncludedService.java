@@ -1,5 +1,6 @@
 package com.rewedigital.composer.composing;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -7,6 +8,8 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.rewedigital.composer.composing.fetch.ContentFetcher;
+import com.rewedigital.composer.composing.fetch.FetchContext;
 import com.spotify.apollo.Response;
 
 /**
@@ -90,7 +93,7 @@ class IncludedService {
     public CompletableFuture<IncludedService.WithResponse> fetch(final ContentFetcher fetcher,
         final CompositionStep parentStep) {
         final CompositionStep step = parentStep.childWith(path());
-        return fetcher.fetch(path(), fallback(), step)
+        return fetcher.fetch(FetchContext.of(path(), fallback(), ttl()), step)
             .thenApply(r -> new WithResponse(step, startOffset, endOffset, r));
     }
 
@@ -100,6 +103,28 @@ class IncludedService {
 
     private String path() {
         return attributes.getOrDefault("path", "");
+    }
+
+    private Duration ttl() {
+        // FIXME: Initialise with global default...
+        final Duration defaultDuration = Duration.ofMillis(Long.MAX_VALUE);
+
+        if (!attributes.containsKey("ttl")) {
+            return defaultDuration;
+        }
+
+        // FIMXE:
+        final String unparsedTtl = attributes.get("ttl");
+        long ttl = Long.MAX_VALUE;
+        try {
+            ttl = Long.parseLong(unparsedTtl);
+        } catch (final NumberFormatException nfEx) {
+            LOGGER.info(
+                "Not able to evaluate ttl for path {} with value {} falling back to the default of {}ms",
+                path(), unparsedTtl, defaultDuration);
+        }
+
+        return Duration.ofMillis(ttl);
     }
 
     public boolean isInRage(final ContentRange contentRange) {

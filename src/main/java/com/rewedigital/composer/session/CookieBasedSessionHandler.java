@@ -108,7 +108,7 @@ public class CookieBasedSessionHandler extends SessionHandler {
         try {
             return HttpCookie.parse(cookieHeader);
         } catch (final Exception e) {
-            LOGGER.warn("erro parsing cookie headers, defaulting to empty session", e);
+            LOGGER.warn("error parsing cookie headers, defaulting to empty session", e);
             return emptyList();
         }
     }

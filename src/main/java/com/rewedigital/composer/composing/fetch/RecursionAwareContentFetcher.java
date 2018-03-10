@@ -1,11 +1,13 @@
-package com.rewedigital.composer.composing;
+package com.rewedigital.composer.composing.fetch;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
+
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.rewedigital.composer.composing.CompositionStep;
 import com.spotify.apollo.Response;
 
 public class RecursionAwareContentFetcher implements ContentFetcher {
@@ -16,18 +18,17 @@ public class RecursionAwareContentFetcher implements ContentFetcher {
     private final int maxRecursion;
 
     public RecursionAwareContentFetcher(final ContentFetcher contentFetcher, final int maxRecursion) {
-        this.contentFetcher = Objects.requireNonNull(contentFetcher);
+        this.contentFetcher = requireNonNull(contentFetcher);
         this.maxRecursion = maxRecursion;
     }
 
     @Override
-    public CompletableFuture<Response<String>> fetch(final String path, final String fallback,
-        final CompositionStep step) {
+    public CompletableFuture<Response<String>> fetch(final FetchContext context, final CompositionStep step) {
         if (maxRecursion < step.depth()) {
-            LOGGER.warn("Max recursion depth execeeded for " + step.callStack());
-            return CompletableFuture.completedFuture(Response.forPayload(fallback));
+            LOGGER.warn("Max recursion depth exceeded for " + step.callStack());
+            return CompletableFuture.completedFuture(Response.forPayload(context.fallback()));
         }
-        return contentFetcher.fetch(path, fallback, step);
+        return contentFetcher.fetch(context, step);
     }
 
 }
