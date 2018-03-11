@@ -4,8 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.rewedigital.composer.composing.fetch.ContentFetcher;
-import com.rewedigital.composer.composing.fetch.RecursionAwareContentFetcher;
 import com.rewedigital.composer.parser.Parser;
 import com.rewedigital.composer.session.ResponseWithSession;
 import com.rewedigital.composer.session.SessionFragment;

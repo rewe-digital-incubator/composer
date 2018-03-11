@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
-import com.rewedigital.composer.composing.fetch.ValidatingContentFetcher;
 import com.rewedigital.composer.session.SessionRoot;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Response;

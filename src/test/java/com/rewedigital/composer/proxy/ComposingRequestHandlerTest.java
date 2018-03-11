@@ -39,7 +39,7 @@ import okio.ByteString;
 public class ComposingRequestHandlerTest {
 
     private static final String SERVICE_RESPONSE = "<html>test</html>";
-    private final Duration ttl = Duration.ZERO;
+    private final Optional<Duration> notTtl = Optional.empty();
 
     @Test
     public void returnsResponseFromTemplateRoute() throws Exception {
@@ -77,7 +77,7 @@ public class ComposingRequestHandlerTest {
     }
 
     private BackendRouting aRouter(final String pattern, final RouteTypeName routeType) {
-        final Rule<Match> sampleRule = Rule.fromUri(pattern, "GET", Match.of("http://target", ttl, routeType));
+        final Rule<Match> sampleRule = Rule.fromUri(pattern, "GET", Match.of("http://target", notTtl, routeType));
         return new BackendRouting(singletonList(sampleRule));
     }
 

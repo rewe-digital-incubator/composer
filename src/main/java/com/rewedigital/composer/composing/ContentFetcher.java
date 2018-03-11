@@ -1,8 +1,7 @@
-package com.rewedigital.composer.composing.fetch;
+package com.rewedigital.composer.composing;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.rewedigital.composer.composing.CompositionStep;
 import com.spotify.apollo.Response;
 
 /**

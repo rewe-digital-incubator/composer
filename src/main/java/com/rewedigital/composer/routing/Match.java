@@ -2,20 +2,21 @@ package com.rewedigital.composer.routing;
 
 import java.time.Duration;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Match {
 
     private final String backend;
-    private final Duration ttl;
+    private final Optional<Duration> ttl;
     private final RouteTypeName routeType;
 
-    private Match(final String backend, final Duration ttl, final RouteTypeName routeType) {
+    private Match(final String backend, final Optional<Duration> ttl, final RouteTypeName routeType) {
         this.backend = backend;
         this.ttl = ttl;
         this.routeType = routeType;
     }
 
-    public static Match of(final String backend, final Duration ttl, final RouteTypeName routeType) {
+    public static Match of(final String backend, final Optional<Duration> ttl, final RouteTypeName routeType) {
         return new Match(backend, ttl, routeType);
     }
 
@@ -23,7 +24,7 @@ public class Match {
         return backend;
     }
 
-    public Duration ttl() {
+    public Optional<Duration> ttl() {
         return ttl;
     }
 

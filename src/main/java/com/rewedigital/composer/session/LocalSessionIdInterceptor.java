@@ -74,7 +74,7 @@ public class LocalSessionIdInterceptor implements SessionHandler.Interceptor {
         try {
             return Long.parseLong(s);
         } catch (final NumberFormatException ex) {
-            LOGGER.error("maleformatted expires-at: {} - expireing session", s, ex);
+            LOGGER.error("Malformatted expires-at: {} - expiring session", s, ex);
             return -1;
         }
     }

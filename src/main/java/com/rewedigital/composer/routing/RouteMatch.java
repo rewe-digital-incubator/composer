@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 import com.damnhandy.uri.template.UriTemplate;
 
@@ -22,7 +23,7 @@ public class RouteMatch {
         return backend.backend();
     }
 
-    public Duration ttl() {
+    public Optional<Duration> ttl() {
         return backend.ttl();
     }
 

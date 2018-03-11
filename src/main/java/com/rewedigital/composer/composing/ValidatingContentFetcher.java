@@ -1,4 +1,4 @@
-package com.rewedigital.composer.composing.fetch;
+package com.rewedigital.composer.composing;
 
 import static java.util.Objects.requireNonNull;
 
@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.damnhandy.uri.template.UriTemplate;
-import com.rewedigital.composer.composing.CompositionStep;
 import com.rewedigital.composer.session.SessionRoot;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
@@ -44,11 +43,20 @@ public class ValidatingContentFetcher implements ContentFetcher {
         }
 
         final String expandedPath = UriTemplate.fromTemplate(context.path()).expand(parsedPathArguments);
-        final Request request = session.enrich(Request.forUri(expandedPath, "GET").withTtl(context.ttl()));
+        final Request request = session.enrich(withTtl(Request.forUri(expandedPath, "GET"), context));
+
+
         return client.send(request)
             .thenApply(response -> acceptHtmlOnly(response, expandedPath))
             .thenApply(r -> toStringPayload(r, context.fallback()))
             .toCompletableFuture();
+    }
+
+    private Request withTtl(final Request request, final FetchContext context) {
+        if (context.ttl().isPresent()) {
+            return request.withTtl(context.ttl().get());
+        }
+        return request;
     }
 
     private Response<String> toStringPayload(final Response<ByteString> response, final String fallback) {

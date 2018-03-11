@@ -3,13 +3,12 @@ package com.rewedigital.composer.composing;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rewedigital.composer.composing.fetch.ContentFetcher;
-import com.rewedigital.composer.composing.fetch.FetchContext;
 import com.spotify.apollo.Response;
 
 /**
@@ -89,12 +88,15 @@ class IncludedService {
         this.fallback = builder.fallback;
     }
 
-
     public CompletableFuture<IncludedService.WithResponse> fetch(final ContentFetcher fetcher,
         final CompositionStep parentStep) {
         final CompositionStep step = parentStep.childWith(path());
         return fetcher.fetch(FetchContext.of(path(), fallback(), ttl()), step)
             .thenApply(r -> new WithResponse(step, startOffset, endOffset, r));
+    }
+
+    public boolean isInRage(final ContentRange contentRange) {
+        return contentRange.isInRange(startOffset);
     }
 
     private String fallback() {
@@ -105,30 +107,22 @@ class IncludedService {
         return attributes.getOrDefault("path", "");
     }
 
-    private Duration ttl() {
-        // FIXME: Initialise with global default...
-        final Duration defaultDuration = Duration.ofMillis(Long.MAX_VALUE);
-
-        if (!attributes.containsKey("ttl")) {
-            return defaultDuration;
-        }
-
-        // FIMXE:
-        final String unparsedTtl = attributes.get("ttl");
-        long ttl = Long.MAX_VALUE;
-        try {
-            ttl = Long.parseLong(unparsedTtl);
-        } catch (final NumberFormatException nfEx) {
-            LOGGER.info(
-                "Not able to evaluate ttl for path {} with value {} falling back to the default of {}ms",
-                path(), unparsedTtl, defaultDuration);
-        }
-
-        return Duration.ofMillis(ttl);
+    private Optional<Duration> ttl() {
+        return longFromMap("ttl").map(Duration::ofMillis);
     }
 
-    public boolean isInRage(final ContentRange contentRange) {
-        return contentRange.isInRange(startOffset);
+
+    private Optional<Long> longFromMap(final String name) {
+        if (!attributes.containsKey(name)) {
+            return Optional.empty();
+        }
+        final String unparsedValue = attributes.get(name);
+        try {
+            return Optional.of(Long.parseLong(unparsedValue));
+        } catch (final NumberFormatException nfEx) {
+            LOGGER.info("Not able to evaluate {} for path {} with value {}.", name, path(), unparsedValue);
+        }
+        return Optional.empty();
     }
 
 }

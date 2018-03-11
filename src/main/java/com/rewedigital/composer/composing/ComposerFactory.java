@@ -2,7 +2,6 @@ package com.rewedigital.composer.composing;
 
 import java.util.Map;
 
-import com.rewedigital.composer.composing.fetch.ValidatingContentFetcher;
 import com.rewedigital.composer.session.SessionRoot;
 import com.spotify.apollo.Client;
 import com.typesafe.config.Config;

@@ -19,8 +19,8 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
 import com.rewedigital.composer.composing.CompositionStep;
-import com.rewedigital.composer.composing.fetch.FetchContext;
-import com.rewedigital.composer.composing.fetch.ValidatingContentFetcher;
+import com.rewedigital.composer.composing.FetchContext;
+import com.rewedigital.composer.composing.ValidatingContentFetcher;
 import com.rewedigital.composer.session.SessionRoot;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
@@ -32,13 +32,13 @@ import okio.ByteString;
 public class ValidatingContentFetcherTest {
 
     private final SessionRoot emptySession = SessionRoot.empty();
-    private final Duration timeOut = Duration.ofMillis(222);
+    private final Optional<Duration> defaultTimeout = Optional.empty();
 
     @Test
     public void fetchesEmptyContentForMissingPath() throws Exception {
         final Response<String> result =
             new ValidatingContentFetcher(mock(Client.class), emptyMap(), emptySession)
-                .fetch(FetchContext.of(null, null, timeOut), aStep())
+                .fetch(FetchContext.of(null, null, defaultTimeout), aStep())
                 .get();
         assertThat(result.payload()).contains("");
     }
@@ -49,7 +49,7 @@ public class ValidatingContentFetcherTest {
         when(client.send(aRequestWithPath("/some/path"))).thenReturn(aResponse("ok"));
         final Response<String> result =
             new ValidatingContentFetcher(client, emptyMap(), emptySession)
-                .fetch(FetchContext.of("/some/path", "fallback", timeOut), aStep())
+                .fetch(FetchContext.of("/some/path", "fallback", defaultTimeout), aStep())
                 .get();
         assertThat(result.payload()).contains("ok");
     }
@@ -60,7 +60,7 @@ public class ValidatingContentFetcherTest {
         when(client.send(aRequestWithPath("/some/path/val"))).thenReturn(aResponse("ok"));
         final Response<String> result =
             new ValidatingContentFetcher(client, params("var", "val"), emptySession)
-                .fetch(FetchContext.of("/some/path/{var}", "fallback", timeOut), aStep())
+                .fetch(FetchContext.of("/some/path/{var}", "fallback", defaultTimeout), aStep())
                 .get();
         assertThat(result.payload()).contains("ok");
     }
@@ -71,7 +71,7 @@ public class ValidatingContentFetcherTest {
         when(client.send(aRequestWithPath("/some/path"))).thenReturn(aResponse("ok", "text/json"));
         final Response<String> result =
             new ValidatingContentFetcher(client, emptyMap(), emptySession)
-                .fetch(FetchContext.of("/some/path", "", timeOut), aStep())
+                .fetch(FetchContext.of("/some/path", "", defaultTimeout), aStep())
                 .get();
         assertThat(result.payload()).contains("");
     }
@@ -82,7 +82,7 @@ public class ValidatingContentFetcherTest {
         when(client.send(any())).thenReturn(aResponse(""));
         final SessionRoot session = session("x-rd-key", "value");
         new ValidatingContentFetcher(client, emptyMap(), session)
-            .fetch(FetchContext.of("/some/path", "", timeOut), aStep())
+            .fetch(FetchContext.of("/some/path", "", defaultTimeout), aStep())
             .get();
         verify(client).send(aRequestWithSession("x-rd-key", "value"));
     }
@@ -90,17 +90,18 @@ public class ValidatingContentFetcherTest {
     @Test
     public void validatingContentFetcherAppliesTtl() throws Exception {
         final StubClient client = aStubClient();
+        final Optional<Duration> timeout = Optional.of(Duration.ofMillis(200));
 
         new ValidatingContentFetcher(client, emptyMap(), emptySession)
-            .fetch(FetchContext.of("path", "fallback", timeOut), aStep())
+            .fetch(FetchContext.of("path", "fallback", timeout), aStep())
             .get();
 
-        assertThat(client.sentRequests()).isNotEmpty().allSatisfy(r -> ttlIsSet(r));
+        assertThat(client.sentRequests()).isNotEmpty().allSatisfy(r -> ttlIsSet(r, timeout));
     }
 
-    private void ttlIsSet(final Request request) {
+    private void ttlIsSet(final Request request, final Optional<Duration> timeout) {
         assertThat(request.ttl()).isNotEmpty();
-        assertThat(request.ttl().get()).isEqualTo(timeOut);
+        assertThat(request.ttl()).isEqualTo(timeout);
     }
 
     private StubClient aStubClient() {
