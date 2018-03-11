@@ -41,6 +41,10 @@ class IncludeMarkupHandler extends AbstractMarkupHandler {
         return contentMarkupHandler.assets();
     }
 
+    List<IncludedService> includedServices() {
+        return includedServices;
+    }
+
     @Override
     public void handleOpenElementStart(final char[] buffer, final int nameOffset, final int nameLen, final int line,
         final int col)

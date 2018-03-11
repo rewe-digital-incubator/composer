@@ -3,7 +3,6 @@ package com.rewedigital.composer.composing;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
@@ -34,9 +33,6 @@ public class ValidatingContentFetcher implements ContentFetcher {
 
     @Override
     public CompletableFuture<Response<String>> fetch(final FetchContext context, final CompositionStep step) {
-        Objects.requireNonNull(context);
-        Objects.requireNonNull(step);
-
         if (context.path() == null || context.path().trim().isEmpty()) {
             LOGGER.warn("Empty path attribute in include found - callstack: " + step.callStack());
             return CompletableFuture.completedFuture(Response.forPayload(""));

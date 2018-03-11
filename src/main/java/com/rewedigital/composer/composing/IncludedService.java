@@ -99,18 +99,17 @@ class IncludedService {
         return contentRange.isInRange(startOffset);
     }
 
-    private String fallback() {
+    String fallback() {
         return fallback;
     }
 
-    private String path() {
+    String path() {
         return attributes.getOrDefault("path", "");
     }
 
-    private Optional<Duration> ttl() {
+    Optional<Duration> ttl() {
         return longFromMap("ttl").map(Duration::ofMillis);
     }
-
 
     private Optional<Long> longFromMap(final String name) {
         if (!attributes.containsKey(name)) {

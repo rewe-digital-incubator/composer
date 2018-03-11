@@ -1,4 +1,4 @@
-package com.rewedigital.composer.composing.fetch;
+package com.rewedigital.composer.composing;
 
 import static java.util.Collections.emptyMap;
 import static java.util.concurrent.CompletableFuture.completedFuture;
