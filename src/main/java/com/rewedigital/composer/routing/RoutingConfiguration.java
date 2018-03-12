@@ -1,6 +1,5 @@
 package com.rewedigital.composer.routing;
 
-import static com.rewedigital.composer.configuration.ConfigUtil.optionalDuration;
 import static java.util.stream.Collectors.toList;
 
 import java.time.Duration;
@@ -9,7 +8,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rewedigital.composer.configuration.ConfigUtil;
 import com.spotify.apollo.route.Rule;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigList;
@@ -48,6 +46,10 @@ public class RoutingConfiguration {
 
     public List<Rule<Match>> localRules() {
         return localRoutes;
+    }
+    
+    private static Optional<Duration> optionalDuration(final Config config, final String path) {
+        return config.hasPath(path) ? Optional.of(config.getDuration(path)) : Optional.empty();
     }
 
 }
