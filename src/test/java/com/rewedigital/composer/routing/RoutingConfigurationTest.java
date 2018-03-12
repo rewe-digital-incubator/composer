@@ -1,9 +1,9 @@
 package com.rewedigital.composer.routing;
 
 import static com.rewedigital.composer.routing.RouteTypeName.PROXY;
-import static java.time.Duration.ofMillis;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -22,8 +22,10 @@ import com.typesafe.config.ConfigFactory;
 
 public class RoutingConfigurationTest {
 
+    private final int timeoutInMs = 200;
     private final Optional<Integer> withoutTtl = Optional.empty();
-    private final Optional<Integer> withTtl = Optional.of(200);
+    private final Optional<Integer> withTtl = Optional.of(timeoutInMs);
+    private final Duration ttlDuration = Duration.ofMillis(timeoutInMs);
 
     @Test
     public void allConfigParametersAreCoveredByDefaultConfig() {
@@ -41,20 +43,19 @@ public class RoutingConfigurationTest {
             assertThat(rule.getPath()).isEqualTo("/test/path/<arg>");
             assertThat(rule.getMethods()).contains("GET");
             final Match routeMatchWithoutTtl =
-                Match.of("https://target.service/{arg}", Optional.empty(), PROXY);
+                Match.of("https://target.service/{arg}", PROXY);
             assertThat(rule.getTarget()).isEqualTo(routeMatchWithoutTtl);
         });
     }
 
     @Test
-    public void setsTtlIfConfigures() {
+    public void setsTtlIfConfigured() {
         final RoutingConfiguration configuration =
             RoutingConfiguration.fromConfig(configWithSingleLocalRoute(withTtl));
         final List<Rule<Match>> localRules = configuration.localRules();
         assertThat(localRules).anySatisfy(rule -> {
-            final Match routeMatchWithTtl =
-                Match.of("https://target.service/{arg}", Optional.of(ofMillis(200)), PROXY);
-            assertThat(routeMatchWithTtl);
+            final Match routeMatchWithTtl = Match.of("https://target.service/{arg}", ttlDuration, PROXY);
+            assertThat(rule.getTarget()).isEqualTo(routeMatchWithTtl);
         });
     }
 

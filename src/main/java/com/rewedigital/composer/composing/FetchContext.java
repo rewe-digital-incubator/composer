@@ -32,6 +32,10 @@ public class FetchContext {
         return new FetchContext(path, fallback, ttl);
     }
 
+    public boolean hasEmptyPath() {
+        return path == null || path().trim().isEmpty();
+    }
+
     public String path() {
         return path;
     }

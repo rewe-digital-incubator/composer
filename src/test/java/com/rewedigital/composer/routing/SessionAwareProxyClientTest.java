@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.Test;
@@ -21,20 +22,26 @@ public class SessionAwareProxyClientTest {
 
     @Test
     public void fetchesTemplateHandlingSession() throws Exception {
-        final String path = "https://some.path/test";
         final String method = "GET";
 
-        final Request expectedRequest = Request.forUri(path, method).withHeader("x-rd-key", "value");
+        final Request expectedRequest =
+            Request.forUri(aRouteMatch().expandedPath(), method).withHeader("x-rd-key", "value");
         final Response<ByteString> response =
             Response.ok().withPayload(ByteString.EMPTY).withHeader("x-rd-response-key", "other-value");
 
         final RequestContext context = contextWith(aClient(expectedRequest, response), method);
         final ResponseWithSession<ByteString> templateResponse =
-            new SessionAwareProxyClient().fetch(path, context, Sessions.sessionRoot("x-rd-key", "value")).toCompletableFuture()
+            new SessionAwareProxyClient().fetch(aRouteMatch(), context, Sessions.sessionRoot("x-rd-key", "value"))
+                .toCompletableFuture()
                 .get();
 
         assertThat(templateResponse.session().get("key")).contains("value");
         assertThat(templateResponse.session().get("response-key")).contains("other-value");
+    }
+
+    private RouteMatch aRouteMatch() {
+        return new RouteMatch(Match.of("https://some.path/test", RouteTypeName.TEMPLATE),
+            Collections.emptyMap());
     }
 
     private RequestContext contextWith(final Client client, final String method) {

@@ -15,10 +15,10 @@ public class IncludeMarkupHandlerTest {
 
         assertThat(handler.includedServices()).isNotEmpty();
         assertThat(handler.includedServices()).allSatisfy(included -> {
-            assertThat(included.ttl()).isPresent().contains(Duration.ofMillis(123));
+            assertThat(included.ttl()).contains(Duration.ofMillis(123));
             assertThat(included.path()).contains("value");
+            assertThat(included.fallback()).contains("Fallback");
         });
-
     }
 
     private IncludeMarkupHandler parse(final String data) {

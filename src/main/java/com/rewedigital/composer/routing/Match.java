@@ -16,6 +16,14 @@ public class Match {
         this.routeType = routeType;
     }
 
+    public static Match of(final String backend, final RouteTypeName routeType) {
+        return new Match(backend, Optional.empty(), routeType);
+    }
+    
+    public static Match of(final String backend, final Duration ttl, final RouteTypeName routeType) {
+        return new Match(backend, Optional.of(ttl), routeType);
+    }
+    
     public static Match of(final String backend, final Optional<Duration> ttl, final RouteTypeName routeType) {
         return new Match(backend, ttl, routeType);
     }
@@ -49,7 +57,7 @@ public class Match {
             return false;
         }
         final Match other = (Match) obj;
-        return Objects.equals(backend, other.backend) && routeType == other.routeType && ttl == other.ttl;
+        return Objects.equals(backend, other.backend) && routeType == other.routeType && Objects.equals(ttl, other.ttl);
     }
 
 }

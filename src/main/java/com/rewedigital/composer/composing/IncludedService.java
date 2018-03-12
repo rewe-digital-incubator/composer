@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.spotify.apollo.Response;
 
 /**
@@ -99,15 +100,18 @@ class IncludedService {
         return contentRange.isInRange(startOffset);
     }
 
-    String fallback() {
+    @VisibleForTesting
+    public String fallback() {
         return fallback;
     }
 
-    String path() {
+    @VisibleForTesting
+    public String path() {
         return attributes.getOrDefault("path", "");
     }
 
-    Optional<Duration> ttl() {
+    @VisibleForTesting
+    public Optional<Duration> ttl() {
         return longFromMap("ttl").map(Duration::ofMillis);
     }
 

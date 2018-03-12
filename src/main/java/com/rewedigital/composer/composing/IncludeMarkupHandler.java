@@ -11,6 +11,8 @@ import org.attoparser.ParseException;
 import org.attoparser.output.OutputMarkupHandler;
 import org.attoparser.util.TextUtil;
 
+import com.google.common.annotations.VisibleForTesting;
+
 class IncludeMarkupHandler extends AbstractMarkupHandler {
 
     private final char[] includeTag;
@@ -41,6 +43,7 @@ class IncludeMarkupHandler extends AbstractMarkupHandler {
         return contentMarkupHandler.assets();
     }
 
+    @VisibleForTesting
     List<IncludedService> includedServices() {
         return includedServices;
     }

@@ -35,12 +35,13 @@ public class RouteMatch {
         return parsedPathArguments;
     }
 
+    public String expandedPath() {
+        return UriTemplate.fromTemplate(backend.backend()).expand(parsedPathArguments);
+    }
+
     @Override
     public String toString() {
         return "RouteMatch [backend=" + backend + ", parsedPathArguments=" + parsedPathArguments + "]";
     }
 
-    public String expandedPath() {
-        return UriTemplate.fromTemplate(backend.backend()).expand(parsedPathArguments);
-    }
 }

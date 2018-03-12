@@ -96,12 +96,11 @@ public class ValidatingContentFetcherTest {
             .fetch(FetchContext.of("path", "fallback", timeout), aStep())
             .get();
 
-        assertThat(client.sentRequests()).isNotEmpty().allSatisfy(r -> ttlIsSet(r, timeout));
+        assertThat(client.sentRequests()).isNotEmpty().allSatisfy(r -> ttlIsSet(r, timeout.get()));
     }
 
-    private void ttlIsSet(final Request request, final Optional<Duration> timeout) {
-        assertThat(request.ttl()).isNotEmpty();
-        assertThat(request.ttl()).isEqualTo(timeout);
+    private void ttlIsSet(final Request request, final Duration timeout) {
+        assertThat(request.ttl()).contains(timeout);
     }
 
     private StubClient aStubClient() {

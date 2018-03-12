@@ -8,7 +8,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -20,6 +19,7 @@ import com.rewedigital.composer.configuration.DefaultConfiguration;
 import com.rewedigital.composer.proxy.ComposingRequestHandler;
 import com.rewedigital.composer.routing.BackendRouting;
 import com.rewedigital.composer.routing.Match;
+import com.rewedigital.composer.routing.RouteMatch;
 import com.rewedigital.composer.routing.RouteTypeName;
 import com.rewedigital.composer.routing.RouteTypes;
 import com.rewedigital.composer.routing.SessionAwareProxyClient;
@@ -39,7 +39,6 @@ import okio.ByteString;
 public class ComposingRequestHandlerTest {
 
     private static final String SERVICE_RESPONSE = "<html>test</html>";
-    private final Optional<Duration> notTtl = Optional.empty();
 
     @Test
     public void returnsResponseFromTemplateRoute() throws Exception {
@@ -77,7 +76,7 @@ public class ComposingRequestHandlerTest {
     }
 
     private BackendRouting aRouter(final String pattern, final RouteTypeName routeType) {
-        final Rule<Match> sampleRule = Rule.fromUri(pattern, "GET", Match.of("http://target", notTtl, routeType));
+        final Rule<Match> sampleRule = Rule.fromUri(pattern, "GET", Match.of("http://target", routeType));
         return new BackendRouting(singletonList(sampleRule));
     }
 
@@ -103,7 +102,7 @@ public class ComposingRequestHandlerTest {
         public static RouteTypes returning(final Status status, final String responseBody) {
             return new RouteTypes(composerFactory(), new SessionAwareProxyClient() {
                 @Override
-                public CompletionStage<ResponseWithSession<ByteString>> fetch(final String path,
+                public CompletionStage<ResponseWithSession<ByteString>> fetch(final RouteMatch rm,
                     final RequestContext context, final SessionRoot session) {
                     return CompletableFuture.completedFuture(
                         new ResponseWithSession<>(Response.of(status, ByteString.encodeUtf8(responseBody)), session));

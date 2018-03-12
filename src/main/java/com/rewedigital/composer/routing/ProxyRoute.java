@@ -23,6 +23,6 @@ public class ProxyRoute implements RouteType {
     @Override
     public CompletionStage<ResponseWithSession<ByteString>> execute(final RouteMatch rm, final RequestContext context,
         final SessionRoot session) {
-        return templateClient.fetch(rm.expandedPath(), context, session);
+        return templateClient.fetch(rm, context, session);
     }
 }

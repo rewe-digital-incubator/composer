@@ -33,14 +33,13 @@ public class ValidatingContentFetcher implements ContentFetcher {
 
     @Override
     public CompletableFuture<Response<String>> fetch(final FetchContext context, final CompositionStep step) {
-        if (context.path() == null || context.path().trim().isEmpty()) {
+        if (context.hasEmptyPath()) {
             LOGGER.warn("Empty path attribute in include found - callstack: " + step.callStack());
             return CompletableFuture.completedFuture(Response.forPayload(""));
         }
 
         final String expandedPath = UriTemplate.fromTemplate(context.path()).expand(parsedPathArguments);
         final Request request = session.enrich(withTtl(Request.forUri(expandedPath, "GET"), context));
-
 
         return client.send(request)
             .thenApply(response -> acceptHtmlOnly(response, expandedPath))
@@ -49,10 +48,7 @@ public class ValidatingContentFetcher implements ContentFetcher {
     }
 
     private Request withTtl(final Request request, final FetchContext context) {
-        if (context.ttl().isPresent()) {
-            return request.withTtl(context.ttl().get());
-        }
-        return request;
+        return context.ttl().map(t -> request.withTtl(t)).orElse(request);
     }
 
     private Response<String> toStringPayload(final Response<ByteString> response, final String fallback) {
