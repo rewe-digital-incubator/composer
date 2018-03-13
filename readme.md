@@ -16,7 +16,7 @@ Routes can be configured via the configuration file using [HCON - human optimise
 ```
 { path: "/", method: "GET", type: "PROXY", target: "https://www.rewe-digital.com/" }
 ```
-Configures a *proxy route* for the path `\`and method `GET` that forwards all requests to the target `https://rewe-digital.com`.
+Configures a *proxy route* for the path `/` and method `GET` that forwards all requests to the target `https://rewe-digital.com`.
 
 Path parameters can be captured using the syntax of the underlying routing engine (https://github.com/danielnorberg/rut), for example 
 ```
@@ -26,7 +26,7 @@ Path parameters can be captured using the syntax of the underlying routing engin
 ### Composition of micro frontends
 **Specify an include**
 
-The html body of the response from a *template route* is fed into the composition engine. the body is parsed looking for *include* tags that specify fragments to be included into the response delivered to the caller. The name of the *include* tag can be changed via configuration, the default is *rewe-digital-include*. 
+The html body of the response from a *template route* is fed into the composition engine. The body is parsed looking for *include* tags that specify fragments to be included into the response delivered to the caller. The name of the *include* tag can be changed via configuration, the default is *rewe-digital-include*. 
 
 *Example*
 ```
@@ -34,7 +34,7 @@ The html body of the response from a *template route* is fed into the compositio
   <rewe-digital-include path="https://some.path/to/fragment"></rewe-digital-include>
 </body>
 ```
-specifies that some content fragment should be included from the path `https://some.path/to/fragment`.
+Specifies that some content fragment should be included from the path `https://some.path/to/fragment`.
 
 **Specify content to be included**
 
@@ -80,7 +80,27 @@ If an include could not be resolved (for example, because the endpoint called fo
         <div>the fallback</div>
     </rewe-digital-content>
 </rewe-digital-include>
-``` 
+```
+
+**Read-Timeouts**
+
+The underlying [OkHttp Client](http://square.github.io/okhttp/) can be configured with global timeouts. The `http.client.connectTimeout, readTimeout, writeTimeout` settings are not sufficient for scenarious where each routing target has different requirements regarding response time. 
+
+Hence, an optional `ttl` parameter can be configured for routes. This config setting applies an individual read timeout in milliseconds (ms) to the route. 
+
+*Example:*
+```
+{ path: "/", method: "GET", type: "PROXY", ttl: 2000, target: "https://www.rewe-digital.com/" }
+```
+
+The same requirements applies to an included service, therefore the template service can add an optional `ttl` attribute. 
+
+*Example*
+```
+<body>
+  <rewe-digital-include path="https://some.path/to/fragment" ttl="500"></rewe-digital-include>
+</body>
+```
 
 ### HTTP Cache
 
