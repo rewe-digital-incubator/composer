@@ -93,7 +93,7 @@ Hence, an optional `ttl` parameter can be configured for routes. This config set
 { path: "/", method: "GET", type: "PROXY", ttl: 2000, target: "https://www.rewe-digital.com/" }
 ```
 
-The same requirements applies to an included service, therefore the template service can add an optional `ttl` attribute. 
+The same requirements is valid for included services, therefore the template service can add an optional `ttl` attribute to the `ìnclude`tag. 
 
 *Example*
 ```
