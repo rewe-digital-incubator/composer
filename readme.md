@@ -86,7 +86,7 @@ If an include could not be resolved (for example, because the endpoint called fo
 
 The underlying [OkHttp Client](http://square.github.io/okhttp/) can be configured with global timeouts. The `http.client.connectTimeout, readTimeout, writeTimeout` settings are not sufficient for scenarious where each routing target has different requirements regarding response time. 
 
-Hence, an optional `ttl` parameter can be configured for routes. The config `ttl` setting applies an individual read timeout in milliseconds (ms) to the route. 
+Hence, an optional `ttl` parameter can be configured for routes. This config setting applies an individual read timeout in milliseconds (ms) to the route. 
 
 *Example:*
 ```
