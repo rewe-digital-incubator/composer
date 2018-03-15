@@ -1,5 +1,7 @@
 package com.rewedigital.composer.composing;
 
+import java.util.Objects;
+
 /**
  * Describes a step in the composition process. The composition is done recursively, and steps are created root to leaf.
  * It is used to trace the progress of the recursive composition. The composition data itself is handled via
@@ -43,4 +45,28 @@ public class CompositionStep {
     public String toString() {
         return callStack();
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(parent, path, depth);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final CompositionStep other = (CompositionStep) obj;
+        return depth == other.depth &&
+            Objects.equals(path, other.path) &&
+            Objects.equals(parent, other.parent);
+    }
+
+
 }

@@ -3,6 +3,7 @@ package com.rewedigital.composer.composing;
 import static java.util.Objects.requireNonNull;
 
 import java.time.Duration;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -46,5 +47,31 @@ public class FetchContext {
 
     public Optional<Duration> ttl() {
         return ttl;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path, fallback, ttl);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final FetchContext other = (FetchContext) obj;
+        return Objects.equals(path, other.path) && Objects.equals(fallback, other.fallback)
+            && Objects.equals(ttl, other.ttl);
+    }
+
+    @Override
+    public String toString() {
+        return "FetchContext [path=" + path + ", fallback=" + fallback + ", ttl=" + ttl + "]";
     }
 }

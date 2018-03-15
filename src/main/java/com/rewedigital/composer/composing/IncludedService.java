@@ -9,7 +9,6 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.spotify.apollo.Response;
 
 /**
@@ -100,32 +99,26 @@ class IncludedService {
         return contentRange.isInRange(startOffset);
     }
 
-    @VisibleForTesting
     public String fallback() {
         return fallback;
     }
 
-    @VisibleForTesting
     public String path() {
         return attributes.getOrDefault("path", "");
     }
 
-    @VisibleForTesting
     public Optional<Duration> ttl() {
-        return longFromMap("ttl").map(Duration::ofMillis);
+        return longAttribute("ttl").map(Duration::ofMillis);
     }
 
-    private Optional<Long> longFromMap(final String name) {
-        if (!attributes.containsKey(name)) {
-            return Optional.empty();
-        }
-        final String unparsedValue = attributes.get(name);
-        try {
-            return Optional.of(Long.parseLong(unparsedValue));
-        } catch (final NumberFormatException nfEx) {
-            LOGGER.info("Not able to evaluate {} for path {} with value {}.", name, path(), unparsedValue);
-        }
-        return Optional.empty();
+    private Optional<Long> longAttribute(final String name) {
+        return Optional.ofNullable(attributes.get(name)).flatMap(v -> {
+            try {
+                return Optional.of(Long.parseLong(v));
+            } catch (final NumberFormatException nfEx) {
+                LOGGER.info("Not able to evaluate {} for path {} with value {}.", name, path(), v);
+                return Optional.empty();
+            }
+        });
     }
-
 }

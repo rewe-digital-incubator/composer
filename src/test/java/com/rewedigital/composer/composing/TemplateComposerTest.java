@@ -5,18 +5,24 @@ import static java.util.concurrent.CompletableFuture.completedFuture;
 import static okio.ByteString.encodeUtf8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
 
 import com.rewedigital.composer.session.SessionRoot;
 import com.spotify.apollo.Client;
+import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 
@@ -25,7 +31,7 @@ import okio.ByteString;
 public class TemplateComposerTest {
 
     @Test
-    public void IgnoresIncludeWhenPathIsMissing() throws Exception {
+    public void ignoresIncludeWhenPathIsMissing() throws Exception {
         final TemplateComposer composer = makeComposer(aClientWithSimpleContent("should not be included"));
 
         final Response<String> result = composer
@@ -59,8 +65,7 @@ public class TemplateComposerTest {
                 "template-path")
             .get().response();
         assertThat(result.payload()).contains(
-            "<head><link rel=\"stylesheet\" href=\"css/link\" />\n" +
-                "</head>");
+            "<head><link rel=\"stylesheet\" href=\"css/link\" />\n</head>");
     }
 
     @Test
@@ -72,9 +77,7 @@ public class TemplateComposerTest {
                 "template-path")
             .get().response();
         assertThat(result.payload()).contains(
-            "<head><script type=\"text/javascript\" src=\"js/link/script.js\" ></script>\n"
-                +
-                "</head>");
+            "<head><script type=\"text/javascript\" src=\"js/link/script.js\" ></script>\n</head>");
     }
 
     @Test
@@ -149,6 +152,20 @@ public class TemplateComposerTest {
         assertThat(result.header("Cache-Control")).contains("no-store,max-age=0");
     }
 
+    @Test
+    public void usesTTLFromIncludeIfPresent() throws Exception {
+        final int ttl = 500;
+
+        final Client client = aClientWithSimpleContent("content");
+        final TemplateComposer composer = makeComposer(client);
+        composer.composeTemplate(r(
+            "template content <include ttl=\"" + ttl + "\" path=\"http://mock/\"></include> more content"),
+            "template-path")
+            .get();
+
+        verify(client).send(aRequestFor("http://mock/", ttl));
+    }
+
     private TemplateComposer makeComposer(final Client client) {
         return makeComposerWithMaxRecursion(client, 10);
     }
@@ -200,7 +217,6 @@ public class TemplateComposerTest {
         return client;
     }
 
-
     private Response<ByteString> contentResponse(final String content, final String head) {
         return Response
             .forPayload(
@@ -215,5 +231,22 @@ public class TemplateComposerTest {
 
     private Response<String> r(final String body) {
         return Response.forPayload(body);
+    }
+
+
+    private Request aRequestFor(final String path, final long ttl) {
+        return argThat(new TypeSafeMatcher<Request>() {
+
+            @Override
+            public void describeTo(final Description description) {
+                description.appendText("a request for path=").appendValue(path).appendText(" with ttl=")
+                    .appendValue(ttl);
+            }
+
+            @Override
+            protected boolean matchesSafely(final Request item) {
+                return path.equals(item.uri()) && Optional.of(ttl).equals(item.ttl().map(d -> d.toMillis()));
+            }
+        });
     }
 }
