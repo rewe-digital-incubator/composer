@@ -99,15 +99,15 @@ class IncludedService {
         return contentRange.isInRange(startOffset);
     }
 
-    public String fallback() {
+    private String fallback() {
         return fallback;
     }
 
-    public String path() {
+    private String path() {
         return attributes.getOrDefault("path", "");
     }
 
-    public Optional<Duration> ttl() {
+    private Optional<Duration> ttl() {
         return longAttribute("ttl").map(Duration::ofMillis);
     }
 
