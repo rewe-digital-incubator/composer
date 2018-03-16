@@ -1,7 +1,7 @@
 package com.rewedigital.composer.session;
 
-import static com.rewedigital.composer.session.Sessions.cleanSessionRoot;
-import static com.rewedigital.composer.session.Sessions.dirtySessionRoot;
+import static com.rewedigital.composer.helper.Sessions.cleanSessionRoot;
+import static com.rewedigital.composer.helper.Sessions.dirtySessionRoot;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

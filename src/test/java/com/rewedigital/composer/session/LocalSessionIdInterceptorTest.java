@@ -1,6 +1,6 @@
 package com.rewedigital.composer.session;
 
-import static com.rewedigital.composer.session.Sessions.sessionRootExpiringAt;
+import static com.rewedigital.composer.helper.Sessions.sessionRootExpiringAt;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

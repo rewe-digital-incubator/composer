@@ -1,21 +1,15 @@
 package com.rewedigital.composer.client;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BinaryOperator;
 
+import com.rewedigital.composer.session.SessionData;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.environment.ClientDecorator;
 import com.spotify.apollo.environment.IncomingRequestAwareClient;
 
-public class ProxyHeaderClientDecorator implements ClientDecorator {
-
-    private static final Collection<String> hopByHopHeaders =
-        new HashSet<>(Arrays.asList("connection", "keep-alive", "proxy-authenticate",
-            "proxy-authorization", "te", "trailer", "transfer-encoding", "upgrade"));
+public class WithIncomingHeadersClientDecorator implements ClientDecorator {
 
     @Override
     public IncomingRequestAwareClient apply(final IncomingRequestAwareClient client) {
@@ -28,14 +22,13 @@ public class ProxyHeaderClientDecorator implements ClientDecorator {
 
     private Request takeoverHeaders(final Request request, final Request incoming) {
         return incoming.headerEntries().stream()
-            .filter(this::isEndToEnd)
+            .filter(this::isNotSessionHeader)
             .reduce(request,
-                (r, e) -> r.withHeader(e.getKey(), e.getValue()), throwingCombiner())
-            .withHeader("x-forwarded-path", incoming.uri());
+                (r, e) -> r.withHeader(e.getKey(), e.getValue()), throwingCombiner());
     }
 
-    private boolean isEndToEnd(final Map.Entry<String, String> header) {
-        return !hopByHopHeaders.contains(header.getKey().toLowerCase());
+    public boolean isNotSessionHeader(final Map.Entry<String, String> header) {
+        return !SessionData.isSessionEntry(header);
     }
 
     private static BinaryOperator<Request> throwingCombiner() {

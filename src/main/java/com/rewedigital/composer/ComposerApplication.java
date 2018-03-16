@@ -8,9 +8,10 @@ import java.util.function.BiFunction;
 
 import com.rewedigital.composer.caching.HttpCacheModule;
 import com.rewedigital.composer.client.ErrorHandlingClientDecoratingModule;
-import com.rewedigital.composer.client.ProxyHeaderClientDecoratingModule;
+import com.rewedigital.composer.client.WithIncomingHeadersClientDecoratingModule;
 import com.rewedigital.composer.composing.ComposerFactory;
 import com.rewedigital.composer.proxy.ComposingRequestHandler;
+import com.rewedigital.composer.proxy.ProxyHeaderMiddleware;
 import com.rewedigital.composer.routing.BackendRouting;
 import com.rewedigital.composer.routing.RouteTypes;
 import com.rewedigital.composer.routing.SessionAwareProxyClient;
@@ -25,6 +26,9 @@ import com.spotify.apollo.route.Route;
 import com.typesafe.config.Config;
 
 public class ComposerApplication {
+
+    private static final List<String> methods =
+        Arrays.asList("GET", "HEAD", "POST", "PUT", "DELETE", "TRACE", "OPTIONS", "PATCH");
 
     public static void main(final String[] args) throws LoadingException {
         HttpService.boot(bootstrapService(), args);
@@ -47,7 +51,7 @@ public class ComposerApplication {
 
     private static List<ApolloModule> additionalModules() {
         return Arrays.asList(
-            ProxyHeaderClientDecoratingModule.create(), ErrorHandlingClientDecoratingModule.create(),
+            WithIncomingHeadersClientDecoratingModule.create(), ErrorHandlingClientDecoratingModule.create(),
             HttpCacheModule.create());
     }
 
@@ -64,29 +68,16 @@ public class ComposerApplication {
                         new SessionAwareProxyClient()),
                     new CookieBasedSessionHandler.Factory(configuration.getConfig("composer.session")));
 
-            configureRoutes(environment, handler);
+            registerRoutes(environment, handler, "/");
+            registerRoutes(environment, handler, "/<path:path>");
         }
 
-        private static void configureRoutes(final Environment environment, final ComposingRequestHandler handler) {
-            environment.routingEngine()
-                .registerAutoRoute(Route.async("GET", "/", handler::execute))
-                .registerAutoRoute(Route.async("HEAD", "/", handler::execute))
-                .registerAutoRoute(Route.async("POST", "/", handler::execute))
-                .registerAutoRoute(Route.async("PUT", "/", handler::execute))
-                .registerAutoRoute(Route.async("DELETE", "/", handler::execute))
-                .registerAutoRoute(Route.async("TRACE", "/", handler::execute))
-                .registerAutoRoute(Route.async("OPTIONS", "/", handler::execute))
-                .registerAutoRoute(Route.async("PATCH", "/", handler::execute))
-                .registerAutoRoute(Route.async("GET", "/<path:path>", handler::execute))
-                .registerAutoRoute(Route.async("HEAD", "/<path:path>", handler::execute))
-                .registerAutoRoute(Route.async("POST", "/<path:path>", handler::execute))
-                .registerAutoRoute(Route.async("PUT", "/<path:path>", handler::execute))
-                .registerAutoRoute(Route.async("DELETE", "/<path:path>", handler::execute))
-                .registerAutoRoute(Route.async("TRACE", "/<path:path>", handler::execute))
-                .registerAutoRoute(Route.async("OPTIONS", "/<path:path>", handler::execute))
-                .registerAutoRoute(Route.async("PATCH", "/<path:path>", handler::execute));
+        private static void registerRoutes(final Environment environment, final ComposingRequestHandler handler,
+            final String uri) {
+            for (final String method : methods) {
+                environment.routingEngine().registerAutoRoute(
+                    Route.async(method, uri, handler::execute).withMiddleware(ProxyHeaderMiddleware::apply));
+            }
         }
-
     }
-
 }

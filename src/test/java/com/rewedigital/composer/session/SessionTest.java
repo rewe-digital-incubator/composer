@@ -1,7 +1,7 @@
 package com.rewedigital.composer.session;
 
-import static com.rewedigital.composer.session.Sessions.cleanSessionRoot;
-import static com.rewedigital.composer.session.Sessions.sessionRoot;
+import static com.rewedigital.composer.helper.Sessions.cleanSessionRoot;
+import static com.rewedigital.composer.helper.Sessions.sessionRoot;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;

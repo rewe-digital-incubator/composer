@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 /**
  * Stores data of a session and provides a couple of methods to manipulate the data.
  */
-class SessionData {
+public class SessionData {
 
     private static final String sessionPrefix = "x-rd-";
 

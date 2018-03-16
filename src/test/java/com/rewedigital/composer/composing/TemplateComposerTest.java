@@ -11,18 +11,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
-import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
 
+import com.rewedigital.composer.helper.RequestMatching;
 import com.rewedigital.composer.session.SessionRoot;
 import com.spotify.apollo.Client;
-import com.spotify.apollo.Request;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 
@@ -163,7 +160,7 @@ public class TemplateComposerTest {
             "template-path")
             .get();
 
-        verify(client).send(aRequestFor("http://mock/", ttl));
+        verify(client).send(argThat(RequestMatching.with("http://mock/", ttl)));
     }
 
     private TemplateComposer makeComposer(final Client client) {
@@ -181,7 +178,6 @@ public class TemplateComposerTest {
     private Client aClientWithSimpleContent(final String content) {
         return aClientWithSimpleContent(content, "");
     }
-
 
     private Client aClientWithSimpleContent(final String content, final String sessionKey, final String sessionValue) {
         return aClientReturning(contentResponse(content, "").withHeader(sessionKey, sessionValue));
@@ -231,22 +227,5 @@ public class TemplateComposerTest {
 
     private Response<String> r(final String body) {
         return Response.forPayload(body);
-    }
-
-
-    private Request aRequestFor(final String path, final long ttl) {
-        return argThat(new TypeSafeMatcher<Request>() {
-
-            @Override
-            public void describeTo(final Description description) {
-                description.appendText("a request for path=").appendValue(path).appendText(" with ttl=")
-                    .appendValue(ttl);
-            }
-
-            @Override
-            protected boolean matchesSafely(final Request item) {
-                return path.equals(item.uri()) && Optional.of(ttl).equals(item.ttl().map(d -> d.toMillis()));
-            }
-        });
     }
 }

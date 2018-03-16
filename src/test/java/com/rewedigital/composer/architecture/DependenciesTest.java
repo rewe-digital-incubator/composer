@@ -32,7 +32,7 @@ public class DependenciesTest {
             public void defineRules() {
                 base().mayUse(base().allSub());
 
-                client.mustNotUse(all());
+                client.mustNotUse(all()).mayUse(session);
                 parser.mustNotUse(all());
                 configuration.mustNotUse(all());
 

@@ -1,4 +1,4 @@
-package com.rewedigital.composer.session;
+package com.rewedigital.composer.helper;
 
 import java.util.HashMap;
 import java.util.Map;

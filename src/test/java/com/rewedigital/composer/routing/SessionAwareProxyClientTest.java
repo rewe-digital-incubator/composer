@@ -9,8 +9,8 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.Test;
 
+import com.rewedigital.composer.helper.Sessions;
 import com.rewedigital.composer.session.ResponseWithSession;
-import com.rewedigital.composer.session.Sessions;
 import com.spotify.apollo.Client;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
