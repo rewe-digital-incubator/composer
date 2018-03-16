@@ -34,7 +34,6 @@ public class ProxyHeaderMiddleware {
             .reduce(originalRequest.clearHeaders(),
                 (r, e) -> r.withHeader(e.getKey(), e.getValue()), throwingCombiner())
             .withHeader("x-forwarded-path", originalRequest.uri());
-        // .withHeader("forwarded", buildForwardedHeader(requestContext));
 
         return RequestContexts.create(decoratedRequest, requestContext.requestScopedClient(),
             requestContext.pathArgs(), requestContext.metadata().arrivalTime().getNano(), requestContext.metadata());
@@ -43,11 +42,6 @@ public class ProxyHeaderMiddleware {
     private static boolean isEndToEnd(final Map.Entry<String, String> header) {
         return !hopByHopHeaders.contains(header.getKey().toLowerCase());
     }
-
-    private static String buildForwardedHeader(final RequestContext requestContext) {
-        return "";
-    }
-
 
     private static BinaryOperator<Request> throwingCombiner() {
         return (a, b) -> {

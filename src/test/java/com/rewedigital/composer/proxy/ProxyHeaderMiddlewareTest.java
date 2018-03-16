@@ -1,6 +1,5 @@
 package com.rewedigital.composer.proxy;
 
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -12,7 +11,6 @@ import java.time.Instant;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -54,12 +52,6 @@ public class ProxyHeaderMiddlewareTest {
         final Request original = Request.forUri("/some/path");
         ProxyHeaderMiddleware.apply(innerHandler).invoke(aContextFor(original));
         verify(innerHandler).invoke(aContextWith(RequestMatching.withHeader("x-forwarded-path", "/some/path")));
-    }
-
-    @Test
-    @Ignore
-    public void shouldAttachForwardedHeader() {
-        fail("not yet implemented");
     }
 
     private Request withHopByHopHeaders(final Request request) {
