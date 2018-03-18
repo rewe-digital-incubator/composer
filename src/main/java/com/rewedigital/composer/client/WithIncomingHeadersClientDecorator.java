@@ -1,8 +1,9 @@
 package com.rewedigital.composer.client;
 
+import static com.rewedigital.composer.util.Combiners.throwingCombiner;
+
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BinaryOperator;
 
 import com.rewedigital.composer.session.SessionData;
 import com.spotify.apollo.Request;
@@ -29,11 +30,5 @@ public class WithIncomingHeadersClientDecorator implements ClientDecorator {
 
     public boolean isNotSessionHeader(final Map.Entry<String, String> header) {
         return !SessionData.isSessionEntry(header);
-    }
-
-    private static BinaryOperator<Request> throwingCombiner() {
-        return (a, b) -> {
-            throw new UnsupportedOperationException("Must not use parallel stream.");
-        };
     }
 }

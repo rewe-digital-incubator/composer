@@ -1,10 +1,11 @@
 package com.rewedigital.composer.proxy;
 
+import static com.rewedigital.composer.util.Combiners.throwingCombiner;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.function.BinaryOperator;
 
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -20,12 +21,12 @@ public class ProxyHeaderMiddleware {
 
     public static <T> AsyncHandler<Response<T>> apply(final AsyncHandler<Response<T>> inner) {
         return requestContext -> {
-            final RequestContext decorated = decoradeContext(requestContext);
+            final RequestContext decorated = decorateContext(requestContext);
             return inner.invoke(decorated);
         };
     }
 
-    private static RequestContext decoradeContext(final RequestContext requestContext) {
+    private static RequestContext decorateContext(final RequestContext requestContext) {
         final Request originalRequest = requestContext.request();
         final Request decoratedRequest = originalRequest
             .headerEntries()
@@ -41,12 +42,6 @@ public class ProxyHeaderMiddleware {
 
     private static boolean isEndToEnd(final Map.Entry<String, String> header) {
         return !hopByHopHeaders.contains(header.getKey().toLowerCase());
-    }
-
-    private static BinaryOperator<Request> throwingCombiner() {
-        return (a, b) -> {
-            throw new UnsupportedOperationException("Must not use parallel stream.");
-        };
     }
 
 }

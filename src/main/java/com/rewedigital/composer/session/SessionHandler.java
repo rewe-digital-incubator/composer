@@ -1,12 +1,13 @@
 package com.rewedigital.composer.session;
 
+import static com.rewedigital.composer.util.Combiners.throwingCombiner;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.function.BinaryOperator;
 
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
@@ -77,11 +78,5 @@ public abstract class SessionHandler implements SessionRoot.Serializer {
     private CompletionStage<SessionRoot> runInterceptors(final SessionRoot session, final RequestContext context) {
         return interceptors.stream().reduce(CompletableFuture.completedFuture(session),
             (f, i) -> f.thenCompose(s -> i.afterCreation(s, context)), throwingCombiner());
-    }
-
-    private static BinaryOperator<CompletableFuture<SessionRoot>> throwingCombiner() {
-        return (f, g) -> {
-            throw new IllegalStateException("Session Interceptors can not be executed in parallel");
-        };
     }
 }

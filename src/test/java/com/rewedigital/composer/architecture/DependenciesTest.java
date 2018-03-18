@@ -25,21 +25,21 @@ public class DependenciesTest {
     @Test
     public void clientDoesNotRelyOnComposing() {
         class ComRewedigitalComposer extends DependencyRuler {
-            DependencyRule client, composing, configuration, parser, proxy, routing, session, caching;
+            DependencyRule client, composing, configuration, parser, proxy, routing, session, caching, util;
 
 
             @Override
             public void defineRules() {
                 base().mayUse(base().allSub());
 
-                client.mustNotUse(all()).mayUse(session);
+                client.mustNotUse(all()).mayUse(session, util);
                 parser.mustNotUse(all());
                 configuration.mustNotUse(all());
 
                 composing.mayUse(client, parser, session, caching);
-                proxy.mayUse(composing, routing, session);
+                proxy.mayUse(composing, routing, session, util);
                 routing.mayUse(composing, session);
-                session.mustNotUse(client, parser, composing, proxy, caching);
+                session.mustNotUse(client, parser, composing, proxy, caching).mayUse(util);
             }
         }
 
