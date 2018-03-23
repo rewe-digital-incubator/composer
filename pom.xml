@@ -23,6 +23,9 @@
         <code-assert.version>0.8.5</code-assert.version>
         <mockwebserver.version>2.5.0</mockwebserver.version>
         <guava-testlib.version>23.6-jre</guava-testlib.version>
+
+        <docker.image.prefix>rewedigital</docker.image.prefix>
+		<dockerfile-maven-version>1.4.0</dockerfile-maven-version>
     </properties>
 
     <dependencies>
@@ -222,6 +225,27 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<version>${dockerfile-maven-version}</version>
+				<configuration>
+					<repository>${docker.image.prefix}/${project.artifactId}</repository>
+					<buildArgs>
+						<JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+					</buildArgs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>default</id>
+						<goals>
+							<goal>build</goal>
+							<goal>push</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
         </plugins>
     </build>
 </project>
