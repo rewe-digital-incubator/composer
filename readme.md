@@ -129,5 +129,5 @@ The interceptor chain is configured via the configuration file. Currently, two i
 ## Development State
 Composer is currently under development and probably not production ready. 
 
-# Licence 
-Apache Licence 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)
+# License 
+Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)
