@@ -12,18 +12,17 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <apollo.version>1.8.0</apollo.version>
-        <attoparser.version>2.0.4.RELEASE</attoparser.version>
-        <handy-uri-templates.version>2.1.7</handy-uri-templates.version>
+        <apollo.version>1.11.0</apollo.version>
+        <attoparser.version>2.0.5.RELEASE</attoparser.version>
+        <handy-uri-templates.version>2.1.8</handy-uri-templates.version>
         <jjwt.version>0.9.1</jjwt.version>
-        <jaxb.version>2.3.0</jaxb.version>
-        <caffeine.version>2.6.2</caffeine.version>
+        <jaxb.version>2.4.0-b180830.0359</jaxb.version>
+        <caffeine.version>2.7.0</caffeine.version>
 
-        <assertj-core.version>3.8.0</assertj-core.version>
-        <code-assert.version>0.8.5</code-assert.version>
+        <assertj-core.version>3.12.2</assertj-core.version>
+        <code-assert.version>0.9.6</code-assert.version>
         <mockwebserver.version>2.5.0</mockwebserver.version>
-        <guava-testlib.version>23.6-jre</guava-testlib.version>
-
+        <guava-testlib.version>28.0-jre</guava-testlib.version>
     </properties>
 
     <dependencies>
@@ -154,7 +153,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>3.8.1</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
@@ -166,7 +165,7 @@
 
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.10</version>
+                <version>3.1.1</version>
                 <executions>
                     <execution>
                         <phase>prepare-package</phase>
@@ -186,7 +185,7 @@
 
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.5</version>
+                <version>3.1.2</version>
                 <configuration>
                     <archive>
                         <addMavenDescriptor>true</addMavenDescriptor>
@@ -207,7 +206,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.2</version>
+                <version>0.8.4</version>
                 <executions>
                     <execution>
                         <goals>
