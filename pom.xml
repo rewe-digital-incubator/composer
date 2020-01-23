@@ -22,7 +22,7 @@
         <assertj-core.version>3.12.2</assertj-core.version>
         <code-assert.version>0.9.6</code-assert.version>
         <mockwebserver.version>2.5.0</mockwebserver.version>
-        <guava-testlib.version>28.0-jre</guava-testlib.version>
+        <guava-testlib.version>28.2-jre</guava-testlib.version>
     </properties>
 
     <dependencies>
