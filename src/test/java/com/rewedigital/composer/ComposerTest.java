@@ -29,7 +29,7 @@ public class ComposerTest {
     public final MockWebServer server = new MockWebServer();
 
     @Rule
-    public ServiceHelper serviceHelper = ComposerApplication.bootstrap(ServiceHelper::create, (s, m) -> s.withModule(m))
+    public ServiceHelper serviceHelper = ComposerApplication.bootstrap(ServiceHelper::create, ServiceHelper::withModule)
         .conf("composer.routing.local-routes", routesConfig(mockTemplateServerUrl()))
         .conf("composer.html.include-tag", "include")
         .conf("composer.html.content-tag", "content")

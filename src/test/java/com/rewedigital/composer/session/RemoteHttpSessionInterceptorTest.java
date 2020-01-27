@@ -2,7 +2,7 @@ package com.rewedigital.composer.session;
 
 import static com.rewedigital.composer.helper.Sessions.sessionRoot;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

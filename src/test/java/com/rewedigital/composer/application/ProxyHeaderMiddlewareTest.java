@@ -8,19 +8,15 @@ import static org.mockito.Mockito.withSettings;
 
 import java.time.Instant;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.ArgumentMatcher;
 
-import com.rewedigital.composer.application.ProxyHeaderMiddleware;
 import com.rewedigital.composer.helper.ARequest;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.route.AsyncHandler;
-
 import okio.ByteString;
 
 public class ProxyHeaderMiddlewareTest {
@@ -30,8 +26,7 @@ public class ProxyHeaderMiddlewareTest {
 
     @Test
     public void shouldRemoveAllHopByHopHeaders() {
-        @SuppressWarnings("unchecked")
-        final AsyncHandler<Response<ByteString>> innerHandler = mock(AsyncHandler.class);
+        @SuppressWarnings("unchecked") final AsyncHandler<Response<ByteString>> innerHandler = mock(AsyncHandler.class);
         final Request original = withHopByHopHeaders(Request.forUri("/"));
         ProxyHeaderMiddleware.apply(innerHandler).invoke(aContextFor(original));
         verify(innerHandler).invoke(aContextWith(ARequest.withoutHeader(hopByHopHeaders)));
@@ -39,8 +34,7 @@ public class ProxyHeaderMiddlewareTest {
 
     @Test
     public void shouldKeepEndToEndHeaders() {
-        @SuppressWarnings("unchecked")
-        final AsyncHandler<Response<ByteString>> innerHandler = mock(AsyncHandler.class);
+        @SuppressWarnings("unchecked") final AsyncHandler<Response<ByteString>> innerHandler = mock(AsyncHandler.class);
         final Request original = Request.forUri("/").withHeader("Cache-Control", "no-cache");
         ProxyHeaderMiddleware.apply(innerHandler).invoke(aContextFor(original));
         verify(innerHandler).invoke(aContextWith(ARequest.withHeader("Cache-Control", "no-cache")));
@@ -48,8 +42,7 @@ public class ProxyHeaderMiddlewareTest {
 
     @Test
     public void shouldAttachForwardedPath() {
-        @SuppressWarnings("unchecked")
-        final AsyncHandler<Response<ByteString>> innerHandler = mock(AsyncHandler.class);
+        @SuppressWarnings("unchecked") final AsyncHandler<Response<ByteString>> innerHandler = mock(AsyncHandler.class);
         final Request original = Request.forUri("/some/path");
         ProxyHeaderMiddleware.apply(innerHandler).invoke(aContextFor(original));
         verify(innerHandler).invoke(aContextWith(ARequest.withHeader("x-forwarded-path", "/some/path")));
@@ -70,19 +63,7 @@ public class ProxyHeaderMiddlewareTest {
         return context;
     }
 
-    private RequestContext aContextWith(final Matcher<Request> request) {
-        return Mockito.argThat(new TypeSafeMatcher<RequestContext>() {
-
-            @Override
-            public void describeTo(final Description description) {
-                description.appendText("a request context with request matching ");
-                request.describeTo(description);
-            }
-
-            @Override
-            protected boolean matchesSafely(final RequestContext item) {
-                return request.matches(item.request());
-            }
-        });
+    private RequestContext aContextWith(final ArgumentMatcher<Request> request) {
+        return Mockito.argThat(item -> request.matches(item.request()));
     }
 }

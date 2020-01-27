@@ -11,8 +11,6 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.rewedigital.composer.application.DefaultConfiguration;
-import com.rewedigital.composer.session.LocalSessionIdInterceptor;
-import com.rewedigital.composer.session.SessionConfiguration;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigFactory;
@@ -45,7 +43,7 @@ public class SessionConfigurationTest {
 
     @Test(expected = ConfigException.WrongType.class)
     public void failsIfInterceptorConfigIsNotAList() {
-        final Config config = configWithBrokernInterceptorsConfig();
+        final Config config = configWithBrokenInterceptorsConfig();
         SessionConfiguration.fromConfig(config);
     }
 
@@ -70,6 +68,7 @@ public class SessionConfigurationTest {
     }
 
     @SafeVarargs
+    @SuppressWarnings("varargs")
     private static Config configWithInterceptors(final Map<String, Object>... interceptors) {
         final List<Map<String, Object>> interceptorsConfigList = Arrays.asList(interceptors);
         final Map<String, Object> interceptorsConfig = new HashMap<>();
@@ -80,7 +79,7 @@ public class SessionConfigurationTest {
     }
 
 
-    private static Config configWithBrokernInterceptorsConfig() {
+    private static Config configWithBrokenInterceptorsConfig() {
         final Map<String, Object> interceptorsConfig = new HashMap<>();
         interceptorsConfig.put("composer.session.interceptors", "test");
         return DefaultConfiguration

@@ -13,9 +13,6 @@ import java.util.Optional;
 import org.junit.Test;
 
 import com.rewedigital.composer.application.DefaultConfiguration;
-import com.rewedigital.composer.routing.Match;
-import com.rewedigital.composer.routing.RouteTypeName;
-import com.rewedigital.composer.routing.RoutingConfiguration;
 import com.spotify.apollo.route.Rule;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -77,6 +74,7 @@ public class RoutingConfigurationTest {
     }
 
     @SafeVarargs
+    @SuppressWarnings("varargs")
     private static Config configWithLocalRoutes(final Map<String, Object>... routes) {
         final List<Map<String, Object>> routesConfigList = Arrays.asList(routes);
         final Map<String, Object> routesConfig = new HashMap<>();
