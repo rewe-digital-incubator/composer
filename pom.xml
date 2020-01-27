@@ -19,10 +19,10 @@
         <jaxb.version>2.4.0-b180830.0359</jaxb.version>
         <caffeine.version>2.7.0</caffeine.version>
 
-        <assertj-core.version>3.12.2</assertj-core.version>
-        <code-assert.version>0.9.6</code-assert.version>
+        <assertj-core.version>3.14.0</assertj-core.version>
+        <code-assert.version>0.9.8</code-assert.version>
         <mockwebserver.version>2.5.0</mockwebserver.version>
-        <guava-testlib.version>28.0-jre</guava-testlib.version>
+        <guava-testlib.version>28.2-jre</guava-testlib.version>
     </properties>
 
     <dependencies>
@@ -185,7 +185,7 @@
 
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.2.0</version>
                 <configuration>
                     <archive>
                         <addMavenDescriptor>true</addMavenDescriptor>
@@ -206,7 +206,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.4</version>
+                <version>0.8.5</version>
                 <executions>
                     <execution>
                         <goals>
