@@ -27,6 +27,7 @@ public class ComposerApplication {
         Arrays.asList("GET", "HEAD", "POST", "PUT", "DELETE", "TRACE", "OPTIONS", "PATCH");
 
     public static void main(final String[] args) throws LoadingException {
+        int hallo = 23;
         HttpService.boot(bootstrapService(), args);
     }
 
