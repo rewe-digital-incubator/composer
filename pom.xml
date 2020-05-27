@@ -20,7 +20,7 @@
         <caffeine.version>2.8.2</caffeine.version>
 
         <assertj-core.version>3.16.1</assertj-core.version>
-        <code-assert.version>0.9.10</code-assert.version>
+        <code-assert.version>0.9.11</code-assert.version>
         <mockwebserver.version>2.7.5</mockwebserver.version>
         <guava-testlib.version>29.0-jre</guava-testlib.version>
     </properties>
